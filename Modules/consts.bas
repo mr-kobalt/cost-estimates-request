@@ -3,179 +3,178 @@ Public Const MAXLONG = (2 ^ 31) - 1
 Public Const MINLONG = (2 ^ 31) * (-1)
 Public Const MAXSINGLE = (2 ^ 15) - 1
 
+' РРјРµРЅР° Р»РёСЃС‚РѕРІ, РёСЃРїРѕР»СЊР·СѓРµРјС‹С… РІ РјР°РєСЂРѕСЃР°С…
+Public Const PURCHASE_SHEET_NAME = "Р Р°СЃС‡С‘С‚ Р·Р°РєСѓРїРєРё" ' РЅР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р° СЃ СЂР°СЃС‡С‘С‚РѕРј Р·Р°РєСѓРїРѕС‡РЅС‹С… С†РµРЅ
+Public Const SALES_SHEET_NAME = "Р Р°СЃС‡С‘С‚ РїСЂРѕРґР°Р¶Рё" ' РЅР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р° РЅР° РєРѕС‚РѕСЂРѕРј Р±СѓРґРµС‚ С„РѕСЂРјРёСЂРѕРІР°С‚СЊСЃСЏ РљРџ
+Public Const SERVICE_SHEET_NAME = "РЎР»СѓР¶РµР±РЅС‹Р№" ' РЅР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р° РЅР° РєРѕС‚РѕСЂРѕРј С…СЂР°РЅСЏС‚СЃСЏ СЃР»СѓР¶РµР±РЅС‹Рµ РґР°РЅРЅС‹Рµ
+Public Const AGREEMENT_SHEET_NAME = "Р›РёСЃС‚ СЃРѕРіР»Р°СЃРѕРІР°РЅРёСЏ" ' РЅР°Р·РІР°РЅРёРµ Р»РёСЃС‚Р° СЃРѕРіР»Р°СЃРѕРІР°РЅРёСЏ СѓСЃР»РѕРІРёР№ РґРѕРіРѕРІРѕСЂР°
 
-' Имена листов, используемых в макросах
-Public Const PURCHASE_SHEET_NAME = "Расчёт закупки" ' название листа с расчётом закупочных цен
-Public Const SALES_SHEET_NAME = "Расчёт продажи" ' название листа на котором будет формироваться КП
-Public Const SERVICE_SHEET_NAME = "Служебный" ' название листа на котором хранятся служебные данные
-Public Const AGREEMENT_SHEET_NAME = "Лист согласования" ' название листа согласования условий договора
+' РРјРµРЅР° "СѓРјРЅС‹С…" С‚Р°Р±Р»РёС†
+Public Const PURCHASE_TABLE_NAME = "Р Р°СЃС‡С‘С‚" ' РЅР°Р·РІР°РЅРёРµ С‚Р°Р±Р»РёС†С‹ СЃ СЂР°СЃС‡С‘С‚РѕРј Р·Р°РєСѓРїРѕС‡РЅС‹С… С†РµРЅ
+Public Const DELIVERY_TABLE_NAME = "Р”РѕСЃС‚Р°РІРєР°" ' РЅР°Р·РІР°РЅРёРµ С‚Р°Р±Р»РёС†С‹ СЃ СЂР°СЃС‡С‘С‚РѕРј РґРѕСЃС‚Р°РІРєРё
 
-' Имена "умных" таблиц
-Public Const PURCHASE_TABLE_NAME = "Расчёт" ' название таблицы с расчётом закупочных цен
-Public Const DELIVERY_TABLE_NAME = "Доставка" ' название таблицы с расчётом доставки
+' РРјРµРЅРѕРІР°РЅРЅС‹Рµ РґРёР°РїР°Р·РѕРЅС‹
+Public Const CURRENCIES_ARRAY_NAME = "РІР°Р»СЋС‚Р°" ' СЃРїРёСЃРѕРє РІР°Р»СЋС‚
+Public Const CURRENCIES_HEADER_ARRAY_NAME = "РІР°Р»СЋС‚Р°_РєРї" ' РЅР°Р·РІР°РЅРёСЏ РІР°Р»СЋС‚ РґР»СЏ РІРєР»СЋС‡РµРЅРёСЏ РІ С€Р°РїРєСѓ РљРџ
+Public Const VAT_ARRAY_NAME = "РќР”РЎ" ' СЃРїРёСЃРѕРє РќР”РЎ
+Public Const PROFIT_TYPE_ARRAY_NAME = "РїСЂРёР±С‹Р»СЊ" ' РЅР°Р·РІР°РЅРёРµ РјР°СЃСЃРёРІР° СЃ С‚РёРїР°РјРё РїСЂРёР±С‹Р»Рё
+Public Const CALC_SOURCE_ARRAY_NAME = "РёСЃС‚РѕС‡РЅРёРє"
+Public Const CALC_CURRENCIES_ARRAY_NAME = "СЂР°СЃС‡С‘С‚_РєСѓСЂСЃР°" ' РЅР°Р·РІР°РЅРёРµ РјР°С‚СЂРёС†С‹ РїРµСЂРµСЂР°СЃС‡С‘С‚Р° РєСѓСЂСЃР°
+Public Const CALC_VAT_ARRAY_NAME = "СЂР°СЃС‡С‘С‚_РќР”РЎ" ' РЅР°Р·РІР°РЅРёРµ РјР°С‚СЂРёС†С‹ РїРµСЂРµСЂР°СЃС‡С‘С‚Р° РќР”РЎ
+Public Const TENDER_ARRAY_NAME = "С‚РµРЅРґРµСЂ_РѕР±Р»Р°СЃС‚СЊ"
+Public Const ASSURANCE_ARRAY_NAME = "РѕР±РµСЃРїРµС‡РµРЅРёРµ_РѕР±Р»Р°СЃС‚СЊ"
+Public Const SERVICE_COLUMNS_ARRAY_NAME = "СЃР»СѓР¶_РєРѕР»РѕРЅРєРё"
+Public Const MANAGERS_NAMES_ARRAY_NAME = "РјРµРЅРµРґР¶РµСЂС‹"
+Public Const MANAGERS_TITLES_ARRAY_NAME = "РјРµРЅРµРґР¶РµСЂС‹_РґРѕР»Р¶РЅРѕСЃС‚СЊ"
+Public Const TERMS_OF_PAYMENT_ARRAY_NAME = "СѓСЃР»РѕРІРёСЏ_РѕРїР»Р°С‚С‹"
+Public Const TERMS_OF_SERVICE_ARRAY_NAME = "СѓСЃР»РѕРІРёСЏ_РІС‹РїРѕР»РЅРµРЅРёСЏ"
 
-' Именованные диапазоны
-Public Const CURRENCIES_ARRAY_NAME = "валюта" ' список валют
-Public Const CURRENCIES_HEADER_ARRAY_NAME = "валюта_кп" ' названия валют для включения в шапку КП
-Public Const VAT_ARRAY_NAME = "НДС" ' список НДС
-Public Const PROFIT_TYPE_ARRAY_NAME = "прибыль" ' название массива с типами прибыли
-Public Const CALC_SOURCE_ARRAY_NAME = "источник"
-Public Const CALC_CURRENCIES_ARRAY_NAME = "расчёт_курса" ' название матрицы перерасчёта курса
-Public Const CALC_VAT_ARRAY_NAME = "расчёт_НДС" ' название матрицы перерасчёта НДС
-Public Const TENDER_ARRAY_NAME = "тендер_область"
-Public Const ASSURANCE_ARRAY_NAME = "обеспечение_область"
-Public Const SERVICE_COLUMNS_ARRAY_NAME = "служ_колонки"
-Public Const MANAGERS_NAMES_ARRAY_NAME = "менеджеры"
-Public Const MANAGERS_TITLES_ARRAY_NAME = "менеджеры_должность"
-Public Const TERMS_OF_PAYMENT_ARRAY_NAME = "условия_оплаты"
-Public Const TERMS_OF_SERVICE_ARRAY_NAME = "условия_выполнения"
+' РРјРµРЅРѕРІР°РЅРЅС‹Рµ СЏС‡РµР№РєРё
+Public Const CALC_CURRENCY_CELL_NAME = "РІР°Р»СЋС‚Р°_СЂР°СЃС‡С‘С‚Р°" ' РЅР°Р·РІР°РЅРёРµ СЏС‡РµР№РєРё СЃ РІР°Р»СЋС‚РѕР№ СЂР°СЃС‡С‘С‚Р°
+Public Const INCLUDE_VAT_CELL_NAME = "РІРєР»СЋС‡РёС‚СЊ_РќР”РЎ" ' РІРєР»СЋС‡РёС‚СЊ Р»Рё РќР”РЎ РІ СЂР°СЃС‡С‘С‚
+Public Const INCLUDE_DELIVERY_CELL_NAME = "РІРєР»СЋС‡РёС‚СЊ_С‚СЂР°РЅСЃРїРѕСЂС‚РЅС‹Рµ_СЂР°СЃС…РѕРґС‹" ' РґРѕР±Р°РІРёС‚СЊ Р»Рё РІ СЂР°СЃС‡С‘С‚ РґРѕСЃС‚Р°РІРєСѓ
+Public Const CURRENT_RATE_DATE_CELL_NAME = "РґР°С‚Р°_С‚РµРєСѓС‰РµРіРѕ_РєСѓСЂСЃР°" ' РЅР°Р·РІР°РЅРёРµ СЏС‡РµР№РєРё СЃ РґР°С‚РѕР№, РЅР° РєРѕС‚РѕСЂСѓСЋ СЂР°СЃСЃС‡РёС‚С‹РІР°РµС‚СЃСЏ РєСѓСЂСЃ
+Public Const TOTAL_COST_CELL_NAME = "СЃРµР±РµСЃС‚РѕРёРјРѕСЃС‚СЊ" ' СЃРµР±РµСЃС‚РѕРёРјРѕСЃС‚СЊ С‚РѕРІР°СЂР° Р±РµР· РґРѕСЃС‚Р°РІРєР° СЃ СѓС‡С‘С‚РѕРј CALC_CURRENCY_CELL_NAME Рё INCLUDE_VAT_CELL_NAME
+Public Const TOTAL_GPL_CELL_NAME = "GPL" ' СЃСѓРјРјР° GPL С‚РѕРІР°СЂР° Р±РµР· РґРѕСЃС‚Р°РІРєР° СЃ СѓС‡С‘С‚РѕРј CALC_CURRENCY_CELL_NAME Рё INCLUDE_VAT_CELL_NAME
+Public Const DELIVERY_COST_CELL_NAME = "СЃС‚РѕРёРјРѕСЃС‚СЊ_РґРѕСЃС‚Р°РІРєРё" ' С‚СЂР°РЅСЃРїРѕСЂС‚РЅС‹Рµ СЂР°СЃС…РѕРґС‹
+Public Const REVENUE_CELL_NAME = "РІС‹СЂСѓС‡РєР°"
+Public Const VAT_AMOUNT_CELL_NAME = "СЂР°Р·РјРµСЂ_РќР”РЎ"
+Public Const TENDER_CELL_NAME = "С‚РµРЅРґРµСЂ"
+Public Const ASSURANCE_CELL_NAME = "РѕР±РµСЃРїРµС‡РµРЅРёРµ"
+Public Const USD_RATE_CELL_NAME = "РєСѓСЂСЃ_USD_Р¦Р‘" ' С‚РµРєСѓС‰РёР№ РєСѓСЂСЃ USD РїРѕ Р¦Р‘
+Public Const EUR_RATE_CELL_NAME = "РєСѓСЂСЃ_EUR_Р¦Р‘" ' С‚РµРєСѓС‰РёР№ РєСѓСЂСЃ EUR РїРѕ Р¦Р‘
+Public Const CALC_USD_RATE_CELL_NAME = "РєСѓСЂСЃ_USD_СЂР°СЃС‡С‘С‚РЅС‹Р№" ' СЂР°СЃС‡С‘С‚РЅС‹Р№ РєСѓСЂСЃ USD
+Public Const CALC_EUR_RATE_CELL_NAME = "РєСѓСЂСЃ_EUR_СЂР°СЃС‡С‘С‚РЅС‹Р№" ' СЂР°СЃС‡С‘С‚РЅС‹Р№ РєСѓСЂСЃ EUR
+Public Const CUSTOMER_CELL_NAME = "РєРѕРЅС‚СЂР°РіРµРЅС‚"
+Public Const PM_CELL_NAME = "РїСЂРѕРµРєС‚РЅС‹Р№_РјРµРЅРµРґР¶РµСЂ"
 
-' Именованные ячейки
-Public Const CALC_CURRENCY_CELL_NAME = "валюта_расчёта" ' название ячейки с валютой расчёта
-Public Const INCLUDE_VAT_CELL_NAME = "включить_НДС" ' включить ли НДС в расчёт
-Public Const INCLUDE_DELIVERY_CELL_NAME = "включить_транспортные_расходы" ' добавить ли в расчёт доставку
-Public Const CURRENT_RATE_DATE_CELL_NAME = "дата_текущего_курса" ' название ячейки с датой, на которую рассчитывается курс
-Public Const TOTAL_COST_CELL_NAME = "себестоимость" ' себестоимость товара без доставка с учётом CALC_CURRENCY_CELL_NAME и INCLUDE_VAT_CELL_NAME
-Public Const TOTAL_GPL_CELL_NAME = "GPL" ' сумма GPL товара без доставка с учётом CALC_CURRENCY_CELL_NAME и INCLUDE_VAT_CELL_NAME
-Public Const DELIVERY_COST_CELL_NAME = "стоимость_доставки" ' транспортные расходы
-Public Const REVENUE_CELL_NAME = "выручка"
-Public Const VAT_AMOUNT_CELL_NAME = "размер_НДС"
-Public Const TENDER_CELL_NAME = "тендер"
-Public Const ASSURANCE_CELL_NAME = "обеспечение"
-Public Const USD_RATE_CELL_NAME = "курс_USD_ЦБ" ' текущий курс USD по ЦБ
-Public Const EUR_RATE_CELL_NAME = "курс_EUR_ЦБ" ' текущий курс EUR по ЦБ
-Public Const CALC_USD_RATE_CELL_NAME = "курс_USD_расчётный" ' расчётный курс USD
-Public Const CALC_EUR_RATE_CELL_NAME = "курс_EUR_расчётный" ' расчётный курс EUR
-Public Const CUSTOMER_CELL_NAME = "контрагент"
-Public Const PM_CELL_NAME = "проектный_менеджер"
+' РРјРµРЅР° С„РѕСЂРј Рё РёС… РіСЂСѓРїРї
+Public Const BOARD_SHAPE_NAME = "Р”РѕСЃРєР°"
 
-' Имена форм и их групп
-Public Const BOARD_SHAPE_NAME = "Доска"
-
-Public Const CHECKBOXES_GROUP_NAME = "Колонки таблицы КП"
-Public Const CHECKBOXES_SUBGROUP_NAME = "Окно группы: колонки таблицы КП"
-Public Const SALESCOLUMNS_INDEX_NUMBER_SHAPE_NAME = "№"
-Public Const SALESCOLUMNS_MANUFACTURER_SHAPE_NAME = "Производитель"
+Public Const CHECKBOXES_GROUP_NAME = "РљРѕР»РѕРЅРєРё С‚Р°Р±Р»РёС†С‹ РљРџ"
+Public Const CHECKBOXES_SUBGROUP_NAME = "РћРєРЅРѕ РіСЂСѓРїРїС‹: РєРѕР»РѕРЅРєРё С‚Р°Р±Р»РёС†С‹ РљРџ"
+Public Const SALESCOLUMNS_INDEX_NUMBER_SHAPE_NAME = "в„–"
+Public Const SALESCOLUMNS_MANUFACTURER_SHAPE_NAME = "РџСЂРѕРёР·РІРѕРґРёС‚РµР»СЊ"
 Public Const SALESCOLUMNS_PN_SHAPE_NAME = "p/n"
-Public Const SALESCOLUMNS_NAME_AND_DESCRIPTION_SHAPE_NAME = "Наименование"
-Public Const SALESCOLUMNS_QTY_SHAPE_NAME = "Кол-во"
-Public Const SALESCOLUMNS_UNIT_SHAPE_NAME = "Ед. изм."
-Public Const SALESCOLUMNS_PRICE_SHAPE_NAME = "Цена"
-Public Const SALESCOLUMNS_TOTAL_SHAPE_NAME = "Сумма"
-Public Const SALESCOLUMNS_VAT_SHAPE_NAME = "НДС"
-Public Const SALESCOLUMNS_DELIVERY_TIME_SHAPE_NAME = "Срок доставки"
+Public Const SALESCOLUMNS_NAME_AND_DESCRIPTION_SHAPE_NAME = "РќР°РёРјРµРЅРѕРІР°РЅРёРµ"
+Public Const SALESCOLUMNS_QTY_SHAPE_NAME = "РљРѕР»-РІРѕ"
+Public Const SALESCOLUMNS_UNIT_SHAPE_NAME = "Р•Рґ. РёР·Рј."
+Public Const SALESCOLUMNS_PRICE_SHAPE_NAME = "Р¦РµРЅР°"
+Public Const SALESCOLUMNS_TOTAL_SHAPE_NAME = "РЎСѓРјРјР°"
+Public Const SALESCOLUMNS_VAT_SHAPE_NAME = "РќР”РЎ"
+Public Const SALESCOLUMNS_DELIVERY_TIME_SHAPE_NAME = "РЎСЂРѕРє РґРѕСЃС‚Р°РІРєРё"
 
-Public Const CALC_PARAMS_GROUP_NAME = "Параметры расчёта"
-Public Const CALC_PARAMS_SUBGROUP_NAME = "Окно группы: Параметры расчёта"
-Public Const CURRENCY_LABEL_SHAPE_NAME = "Метка _валюта_"
-Public Const VAT_LABEL_SHAPE_NAME = "Метка _НДС_"
-Public Const CURRENCY_SHAPE_NAME = "Список _валюта_"
-Public Const VAT_SHAPE_NAME = "Список _НДС_"
-Public Const DELIVERY_SHAPE_NAME = "Включить доставку"
+Public Const CALC_PARAMS_GROUP_NAME = "РџР°СЂР°РјРµС‚СЂС‹ СЂР°СЃС‡С‘С‚Р°"
+Public Const CALC_PARAMS_SUBGROUP_NAME = "РћРєРЅРѕ РіСЂСѓРїРїС‹: РџР°СЂР°РјРµС‚СЂС‹ СЂР°СЃС‡С‘С‚Р°"
+Public Const CURRENCY_LABEL_SHAPE_NAME = "РњРµС‚РєР° _РІР°Р»СЋС‚Р°_"
+Public Const VAT_LABEL_SHAPE_NAME = "РњРµС‚РєР° _РќР”РЎ_"
+Public Const CURRENCY_SHAPE_NAME = "РЎРїРёСЃРѕРє _РІР°Р»СЋС‚Р°_"
+Public Const VAT_SHAPE_NAME = "РЎРїРёСЃРѕРє _РќР”РЎ_"
+Public Const DELIVERY_SHAPE_NAME = "Р’РєР»СЋС‡РёС‚СЊ РґРѕСЃС‚Р°РІРєСѓ"
 
-Public Const PROFIT_GROUP_NAME = "Расчёт прибыли"
-Public Const PROFIT_SUBGROUP_NAME = "Окно группы: Расчёт прибыли"
-Public Const CALC_TYPE_SUBGROUP_NAME = "Окно группы: Способ расчёта"
-Public Const MARKUP_SHAPE_NAME = "Наценка"
-Public Const MARGIN_SHAPE_NAME = "Маржа"
-Public Const CALC_SOURCE_SUBGROUP_NAME = "Окно группы: Источник"
-Public Const GPL_SHAPE_NAME = "От GPL"
-Public Const NET_PRICE_SHAPE_NAME = "От входа"
-Public Const CALC_LABEL_SHAPE_NAME = "Надпись _рассчитать_"
-Public Const CALC_BUTTON_SHAPE_NAME = "Кнопка _рассчитать_"
+Public Const PROFIT_GROUP_NAME = "Р Р°СЃС‡С‘С‚ РїСЂРёР±С‹Р»Рё"
+Public Const PROFIT_SUBGROUP_NAME = "РћРєРЅРѕ РіСЂСѓРїРїС‹: Р Р°СЃС‡С‘С‚ РїСЂРёР±С‹Р»Рё"
+Public Const CALC_TYPE_SUBGROUP_NAME = "РћРєРЅРѕ РіСЂСѓРїРїС‹: РЎРїРѕСЃРѕР± СЂР°СЃС‡С‘С‚Р°"
+Public Const MARKUP_SHAPE_NAME = "РќР°С†РµРЅРєР°"
+Public Const MARGIN_SHAPE_NAME = "РњР°СЂР¶Р°"
+Public Const CALC_SOURCE_SUBGROUP_NAME = "РћРєРЅРѕ РіСЂСѓРїРїС‹: РСЃС‚РѕС‡РЅРёРє"
+Public Const GPL_SHAPE_NAME = "РћС‚ GPL"
+Public Const NET_PRICE_SHAPE_NAME = "РћС‚ РІС…РѕРґР°"
+Public Const CALC_LABEL_SHAPE_NAME = "РќР°РґРїРёСЃСЊ _СЂР°СЃСЃС‡РёС‚Р°С‚СЊ_"
+Public Const CALC_BUTTON_SHAPE_NAME = "РљРЅРѕРїРєР° _СЂР°СЃСЃС‡РёС‚Р°С‚СЊ_"
 
-Public Const EXPORT_GROUP_NAME = "Экспорт"
-Public Const EXPORT_SUBGROUP_NAME = "Окно группы: Экспортировать"
-Public Const EXPORT_LABEL_SHAPE_NAME = "Надпись _экспортировать_"
-Public Const EXPORT_WORD_BUTTON_SHAPE_NAME = "Кнопка: в word"
-Public Const EXPORT_EXCEL_BUTTON_SHAPE_NAME = "Кнопка: в excel"
+Public Const EXPORT_GROUP_NAME = "Р­РєСЃРїРѕСЂС‚"
+Public Const EXPORT_SUBGROUP_NAME = "РћРєРЅРѕ РіСЂСѓРїРїС‹: Р­РєСЃРїРѕСЂС‚РёСЂРѕРІР°С‚СЊ"
+Public Const EXPORT_LABEL_SHAPE_NAME = "РќР°РґРїРёСЃСЊ _СЌРєСЃРїРѕСЂС‚РёСЂРѕРІР°С‚СЊ_"
+Public Const EXPORT_WORD_BUTTON_SHAPE_NAME = "РљРЅРѕРїРєР°: РІ word"
+Public Const EXPORT_EXCEL_BUTTON_SHAPE_NAME = "РљРЅРѕРїРєР°: РІ excel"
 
-' Прочее
-Public Const PRICE_ROUNDING_UP_TO_QTY = 2 ' знаков после запятой при округлении цен
-Public Const INDEX_RANK_QTY = 3 ' максимальное количество разрядов в номерах строк КП (см. correctNumberColumn)
-Public Const YES = "да"
-Public Const NO = "нет"
+' РџСЂРѕС‡РµРµ
+Public Const PRICE_ROUNDING_UP_TO_QTY = 2 ' Р·РЅР°РєРѕРІ РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№ РїСЂРё РѕРєСЂСѓРіР»РµРЅРёРё С†РµРЅ
+Public Const INDEX_RANK_QTY = 3 ' РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ СЂР°Р·СЂСЏРґРѕРІ РІ РЅРѕРјРµСЂР°С… СЃС‚СЂРѕРє РљРџ (СЃРј. correctNumberColumn)
+Public Const YES = "РґР°"
+Public Const NO = "РЅРµС‚"
 
-' Ссылки на внешние источники
-Public Const CBR_XML_URL = "http://www.cbr.ru/scripts/XML_daily_eng.asp" ' XML с актуальными курсами с сайта ЦБ РФ
+' РЎСЃС‹Р»РєРё РЅР° РІРЅРµС€РЅРёРµ РёСЃС‚РѕС‡РЅРёРєРё
+Public Const CBR_XML_URL = "http://www.cbr.ru/scripts/XML_daily_eng.asp" ' XML СЃ Р°РєС‚СѓР°Р»СЊРЅС‹РјРё РєСѓСЂСЃР°РјРё СЃ СЃР°Р№С‚Р° Р¦Р‘ Р Р¤
 
-' XML запросы в нотации xPath
-Public Const CURRENT_RATE_DATE_XPATH = "//ValCurs/@Date" ' значение даты из CBR_XML_URL
-Public Const USD_RATE_XPATH = "//ValCurs/Valute[@ID='R01235']/Value" ' курс доллара из CBR_XML_URL
-Public Const EUR_RATE_XPATH = "//ValCurs/Valute[@ID='R01239']/Value" ' курс евро из CBR_XML_URL
+' XML Р·Р°РїСЂРѕСЃС‹ РІ РЅРѕС‚Р°С†РёРё xPath
+Public Const CURRENT_RATE_DATE_XPATH = "//ValCurs/@Date" ' Р·РЅР°С‡РµРЅРёРµ РґР°С‚С‹ РёР· CBR_XML_URL
+Public Const USD_RATE_XPATH = "//ValCurs/Valute[@ID='R01235']/Value" ' РєСѓСЂСЃ РґРѕР»Р»Р°СЂР° РёР· CBR_XML_URL
+Public Const EUR_RATE_XPATH = "//ValCurs/Valute[@ID='R01239']/Value" ' РєСѓСЂСЃ РµРІСЂРѕ РёР· CBR_XML_URL
 
-' Здесь должны были декларироваться используемые форматы цен в виде строковых констант,
-' но VBA не имеет возможности работать с юникодом в IDE, а функцию ChrW(), как и другие
-' процедуры,нельзя использовать при задании значения констант, поэтому эти строки определены
-' в качестве переменных в каждой процедуре/функции, которая в них нуждается. Значения этих
-' переменных представлены ниже:
-'Public Const formatRUR = "# ##0,00\ [$" & ChrW(8381) & "-ru-RU]_-;[Красный]-# ##0,00\ [$" & ChrW(8381) & "-ru-RU]_-;""-""??\ [$" & ChrW(8381) & "-ru-RU]_-"
-'Public Const formatEUR = "# ##0,00\ [$€-x-euro1]_-;[Красный]-# ##0,00\ [$€-x-euro1]_-;""-""??\ [$€-x-euro1]_-"
-'Public Const formatUSD = "# ##0,00 $_-;[Красный]-# ##0,00 $_-;""-""?? $_-"
+' Р—РґРµСЃСЊ РґРѕР»Р¶РЅС‹ Р±С‹Р»Рё РґРµРєР»Р°СЂРёСЂРѕРІР°С‚СЊСЃСЏ РёСЃРїРѕР»СЊР·СѓРµРјС‹Рµ С„РѕСЂРјР°С‚С‹ С†РµРЅ РІ РІРёРґРµ СЃС‚СЂРѕРєРѕРІС‹С… РєРѕРЅСЃС‚Р°РЅС‚,
+' РЅРѕ VBA РЅРµ РёРјРµРµС‚ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё СЂР°Р±РѕС‚Р°С‚СЊ СЃ СЋРЅРёРєРѕРґРѕРј РІ IDE, Р° С„СѓРЅРєС†РёСЋ ChrW(), РєР°Рє Рё РґСЂСѓРіРёРµ
+' РїСЂРѕС†РµРґСѓСЂС‹,РЅРµР»СЊР·СЏ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РїСЂРё Р·Р°РґР°РЅРёРё Р·РЅР°С‡РµРЅРёСЏ РєРѕРЅСЃС‚Р°РЅС‚, РїРѕСЌС‚РѕРјСѓ СЌС‚Рё СЃС‚СЂРѕРєРё РѕРїСЂРµРґРµР»РµРЅС‹
+' РІ РєР°С‡РµСЃС‚РІРµ РїРµСЂРµРјРµРЅРЅС‹С… РІ РєР°Р¶РґРѕР№ РїСЂРѕС†РµРґСѓСЂРµ/С„СѓРЅРєС†РёРё, РєРѕС‚РѕСЂР°СЏ РІ РЅРёС… РЅСѓР¶РґР°РµС‚СЃСЏ. Р—РЅР°С‡РµРЅРёСЏ СЌС‚РёС…
+' РїРµСЂРµРјРµРЅРЅС‹С… РїСЂРµРґСЃС‚Р°РІР»РµРЅС‹ РЅРёР¶Рµ:
+'Public Const formatRUR = "# ##0,00\ [$" & ChrW(8381) & "-ru-RU]_-;[РљСЂР°СЃРЅС‹Р№]-# ##0,00\ [$" & ChrW(8381) & "-ru-RU]_-;""-""??\ [$" & ChrW(8381) & "-ru-RU]_-"
+'Public Const formatEUR = "# ##0,00\ [$в‚¬-x-euro1]_-;[РљСЂР°СЃРЅС‹Р№]-# ##0,00\ [$в‚¬-x-euro1]_-;""-""??\ [$в‚¬-x-euro1]_-"
+'Public Const formatUSD = "# ##0,00 $_-;[РљСЂР°СЃРЅС‹Р№]-# ##0,00 $_-;""-""?? $_-"
 Public Const DEFAULT_FONT = "Century Gothic"
 Public Const ALTERNATIVE_FONT = "Century"
-Public Const DATE_FIELD_FORMAT = "\@ ""d MMMM yyyy 'г.'"""
+Public Const DATE_FIELD_FORMAT = "\@ ""d MMMM yyyy 'Рі.'"""
 Public Const COMPANY_COLOR = 11762456 ' RGB(24, 123, 179)
 
-' Константы для определения местоположения таблицы КП:
-Public Const ROW_OFFSET = 19 ' Сдвиг по вертикали относительно ячейки R1C1
-Public Const COLUMN_OFFSET = 1 ' Сдвиг по горизонтали относительно ячейки R1C1
+' РљРѕРЅСЃС‚Р°РЅС‚С‹ РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РјРµСЃС‚РѕРїРѕР»РѕР¶РµРЅРёСЏ С‚Р°Р±Р»РёС†С‹ РљРџ:
+Public Const ROW_OFFSET = 19 ' РЎРґРІРёРі РїРѕ РІРµСЂС‚РёРєР°Р»Рё РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ СЏС‡РµР№РєРё R1C1
+Public Const COLUMN_OFFSET = 1 ' РЎРґРІРёРі РїРѕ РіРѕСЂРёР·РѕРЅС‚Р°Р»Рё РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ СЏС‡РµР№РєРё R1C1
 
-' Нумерация колонок с расчётом департамента закупок
+' РќСѓРјРµСЂР°С†РёСЏ РєРѕР»РѕРЅРѕРє СЃ СЂР°СЃС‡С‘С‚РѕРј РґРµРїР°СЂС‚Р°РјРµРЅС‚Р° Р·Р°РєСѓРїРѕРє
 Public Enum PurchaseColumns
     [_FIRST] = 0
-    INDEX_NUMBER = 1 ' порядковый номер/индекс
-    MANUFACTURER = 2 ' производитель
-    PN = 3 ' артикул/продуктовый номер/партномер
-    NAME_AND_DESCRIPTION = 4 ' наименование/описание
-    QTY = 5 ' количество
-    Unit = 6 ' единица измерения
-    PRICE_GPL_RECALCULATED = 7 ' цена прайс-листа после пересчёта в валюта_расчёта
-    TOTAL_GPL_RECALCULATED = 8 ' сумма прайс-листа после пересчёта в валюта_расчёта
-    DISCOUNT = 9 ' скидка, вычисляемая из суммы прайс-листа и суммы входа в валюте расчёта
-    PRICE_PURCHASE_RECALCULATED = 10 ' цена закупки после пересчёта в валюта_расчёта
-    TOTAL_PURCHASE_RECALCULATED = 11 ' сумма закупки после пересчёта в валюта_расчёта
-    VAT_PURCHASE = 12 ' НДС расчёта
-    DELIVERY_TIME = 13 ' срок доставки
-    SUPPLIER = 14 ' поставщик
-    USER_COMMENTS = 15 ' комментарии
-    UNIT_WEIGHT = 16 ' вес штуки
-    TOTAL_WEIGHT = 17 ' вес суммарный
-    UNIT_VOLUME = 18 ' объём штуки
-    TOTAL_VOLUME = 19 ' объём суммарный
-    GPL_CURRENCY = 20 ' валюта прайс-листа
-    PRICE_GPL = 21 ' цена прайс-листа
-    PURCHASE_CURRENCY = 22 ' валюта прайс-листа
-    PRICE_PURCHASE = 23 ' цена закупки
-    VAT = 24 ' Value Added Tax - НДС
-    TOTAL_GPL = 25 ' сумма прайс-листа
-    TOTAL_PURCHASE = 26 ' сумма закупки
+    INDEX_NUMBER = 1 ' РїРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ/РёРЅРґРµРєСЃ
+    MANUFACTURER = 2 ' РїСЂРѕРёР·РІРѕРґРёС‚РµР»СЊ
+    PN = 3 ' Р°СЂС‚РёРєСѓР»/РїСЂРѕРґСѓРєС‚РѕРІС‹Р№ РЅРѕРјРµСЂ/РїР°СЂС‚РЅРѕРјРµСЂ
+    NAME_AND_DESCRIPTION = 4 ' РЅР°РёРјРµРЅРѕРІР°РЅРёРµ/РѕРїРёСЃР°РЅРёРµ
+    QTY = 5 ' РєРѕР»РёС‡РµСЃС‚РІРѕ
+    Unit = 6 ' РµРґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ
+    PRICE_GPL_RECALCULATED = 7 ' С†РµРЅР° РїСЂР°Р№СЃ-Р»РёСЃС‚Р° РїРѕСЃР»Рµ РїРµСЂРµСЃС‡С‘С‚Р° РІ РІР°Р»СЋС‚Р°_СЂР°СЃС‡С‘С‚Р°
+    TOTAL_GPL_RECALCULATED = 8 ' СЃСѓРјРјР° РїСЂР°Р№СЃ-Р»РёСЃС‚Р° РїРѕСЃР»Рµ РїРµСЂРµСЃС‡С‘С‚Р° РІ РІР°Р»СЋС‚Р°_СЂР°СЃС‡С‘С‚Р°
+    DISCOUNT = 9 ' СЃРєРёРґРєР°, РІС‹С‡РёСЃР»СЏРµРјР°СЏ РёР· СЃСѓРјРјС‹ РїСЂР°Р№СЃ-Р»РёСЃС‚Р° Рё СЃСѓРјРјС‹ РІС…РѕРґР° РІ РІР°Р»СЋС‚Рµ СЂР°СЃС‡С‘С‚Р°
+    PRICE_PURCHASE_RECALCULATED = 10 ' С†РµРЅР° Р·Р°РєСѓРїРєРё РїРѕСЃР»Рµ РїРµСЂРµСЃС‡С‘С‚Р° РІ РІР°Р»СЋС‚Р°_СЂР°СЃС‡С‘С‚Р°
+    TOTAL_PURCHASE_RECALCULATED = 11 ' СЃСѓРјРјР° Р·Р°РєСѓРїРєРё РїРѕСЃР»Рµ РїРµСЂРµСЃС‡С‘С‚Р° РІ РІР°Р»СЋС‚Р°_СЂР°СЃС‡С‘С‚Р°
+    VAT_PURCHASE = 12 ' РќР”РЎ СЂР°СЃС‡С‘С‚Р°
+    DELIVERY_TIME = 13 ' СЃСЂРѕРє РґРѕСЃС‚Р°РІРєРё
+    SUPPLIER = 14 ' РїРѕСЃС‚Р°РІС‰РёРє
+    USER_COMMENTS = 15 ' РєРѕРјРјРµРЅС‚Р°СЂРёРё
+    UNIT_WEIGHT = 16 ' РІРµСЃ С€С‚СѓРєРё
+    TOTAL_WEIGHT = 17 ' РІРµСЃ СЃСѓРјРјР°СЂРЅС‹Р№
+    UNIT_VOLUME = 18 ' РѕР±СЉС‘Рј С€С‚СѓРєРё
+    TOTAL_VOLUME = 19 ' РѕР±СЉС‘Рј СЃСѓРјРјР°СЂРЅС‹Р№
+    GPL_CURRENCY = 20 ' РІР°Р»СЋС‚Р° РїСЂР°Р№СЃ-Р»РёСЃС‚Р°
+    PRICE_GPL = 21 ' С†РµРЅР° РїСЂР°Р№СЃ-Р»РёСЃС‚Р°
+    PURCHASE_CURRENCY = 22 ' РІР°Р»СЋС‚Р° РїСЂР°Р№СЃ-Р»РёСЃС‚Р°
+    PRICE_PURCHASE = 23 ' С†РµРЅР° Р·Р°РєСѓРїРєРё
+    VAT = 24 ' Value Added Tax - РќР”РЎ
+    TOTAL_GPL = 25 ' СЃСѓРјРјР° РїСЂР°Р№СЃ-Р»РёСЃС‚Р°
+    TOTAL_PURCHASE = 26 ' СЃСѓРјРјР° Р·Р°РєСѓРїРєРё
     [_LAST]
 End Enum
 
-' Индексы колонок расчёта КП
+' РРЅРґРµРєСЃС‹ РєРѕР»РѕРЅРѕРє СЂР°СЃС‡С‘С‚Р° РљРџ
 Public Enum SalesColumns
     [_FIRST] = 0
-    INDEX_NUMBER = 1 ' порядковый номер/индекс
-    MANUFACTURER = 2 ' производитель
-    PN = 3 ' артикул/продуктовый номер/партномер
-    NAME_AND_DESCRIPTION = 4 ' наименование/описание
-    QTY = 5 ' количество
-    Unit = 6 ' единица измерения
-    Price = 7 ' цена
-    total = 8 ' сумма
-    VAT = 9 ' НДС
-    DELIVERY_TIME = 10 ' срок доставки
+    INDEX_NUMBER = 1 ' РїРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ/РёРЅРґРµРєСЃ
+    MANUFACTURER = 2 ' РїСЂРѕРёР·РІРѕРґРёС‚РµР»СЊ
+    PN = 3 ' Р°СЂС‚РёРєСѓР»/РїСЂРѕРґСѓРєС‚РѕРІС‹Р№ РЅРѕРјРµСЂ/РїР°СЂС‚РЅРѕРјРµСЂ
+    NAME_AND_DESCRIPTION = 4 ' РЅР°РёРјРµРЅРѕРІР°РЅРёРµ/РѕРїРёСЃР°РЅРёРµ
+    QTY = 5 ' РєРѕР»РёС‡РµСЃС‚РІРѕ
+    Unit = 6 ' РµРґРёРЅРёС†Р° РёР·РјРµСЂРµРЅРёСЏ
+    Price = 7 ' С†РµРЅР°
+    total = 8 ' СЃСѓРјРјР°
+    VAT = 9 ' РќР”РЎ
+    DELIVERY_TIME = 10 ' СЃСЂРѕРє РґРѕСЃС‚Р°РІРєРё
     [_MIDDLE] = 99
-    BLANK = 100 ' пустой столбец
-    Row = 101 ' номер соответствующей строки в таблице расчёта закупки (служебный)
+    BLANK = 100 ' РїСѓСЃС‚РѕР№ СЃС‚РѕР»Р±РµС†
+    Row = 101 ' РЅРѕРјРµСЂ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµР№ СЃС‚СЂРѕРєРё РІ С‚Р°Р±Р»РёС†Рµ СЂР°СЃС‡С‘С‚Р° Р·Р°РєСѓРїРєРё (СЃР»СѓР¶РµР±РЅС‹Р№)
     PROFIT_TYPE = 102
     CALC_SOURCE = 103
-    PROFIT = 104 ' маржа в процентах
+    PROFIT = 104 ' РјР°СЂР¶Р° РІ РїСЂРѕС†РµРЅС‚Р°С…
     [_LAST]
 End Enum
 
-' Индексы колонок условий оплаты
+' РРЅРґРµРєСЃС‹ РєРѕР»РѕРЅРѕРє СѓСЃР»РѕРІРёР№ РѕРїР»Р°С‚С‹
 Public Enum TermsOfPaymentColumns
     [_FIRST] = 0
     typename = 1
@@ -187,7 +186,7 @@ Public Enum TermsOfPaymentColumns
     [_LAST]
 End Enum
 
-' Индексы колонок условий поставки/выполнения работ
+' РРЅРґРµРєСЃС‹ РєРѕР»РѕРЅРѕРє СѓСЃР»РѕРІРёР№ РїРѕСЃС‚Р°РІРєРё/РІС‹РїРѕР»РЅРµРЅРёСЏ СЂР°Р±РѕС‚
 Public Enum TermsOfServiceColumns
     [_FIRST] = 0
     CITY = 1
@@ -199,29 +198,29 @@ Public Enum TermsOfServiceColumns
     [_LAST]
 End Enum
 
-' Различный текст
-Public Const TEXTS_SUBTOTAL = "ПОДЫТОГ"
-Public Const TEXTS_TOTAL = "ИТОГО"
-Public Const TEXTS_NOT_SUBJECT_VAT = "НДС не облагается в соответствии с пп.26 ч.2 ст.149 НК РФ"
-Public Const TEXTS_SUBJECT_VAT = "в т.ч. НДС 18%"
-Public Const TEXTS_NOTICE_MARGIN = "маржа не может быть больше 100%"
-Public Const TEXTS_NOTICE_MARKUP = "наценка не может быть меньше -100%"
-Public Const TEXTS_MOTTO = "IT-ИНТЕГРАТОР" & vbCrLf & "С ПОЛНЫМ ПРИВОДОМ"
-Public Const TEXTS_ADDRESS = "117587, г. Москва" & vbCrLf & "Варшавское шоссе, д. 125Ж, корп. 6" & vbCrLf & "sales@4by4.ru, +7 (499) 753-23-44"
-Public Const TEXTS_4X4_SHORT = "ООО ""4х4 УК"""
-Public Const TEXTS_4X4_LONG = "Общество с ограниченной ответственностью ""4х4 управляющая компания"""
-Public Const TEXTS_FROM = "От: "
-Public Const TEXTS_REFERENCE = "Исх. №_________" & vbCrLf & "от "
-Public Const TEXTS_WHOM = "Кому: "
-Public Const TEXTS_SALES_OFFER = "КОММЕРЧЕСКОЕ ПРЕДЛОЖЕНИЕ"
-Public Const TEXTS_PITCH = "готово передать Товар и (или) выполнить Работы согласно спецификации:"
-Public Const TEXTS_TERMS_OF_PAYMENT = "Условия оплаты:"
-Public Const TEXTS_TERMS_OF_SERVICE = "Условия поставки/выполнения работ:"
-Public Const TEXTS_DELIVERY_INCLUDED = "стоимость доставки включена в стоимость оборудования"
-Public Const TEXTS_DELIVERY_NOT_INCLUDED = "стоимость оборудования не включает стоимость доставки и разгрузочных работ"
+' Р Р°Р·Р»РёС‡РЅС‹Р№ С‚РµРєСЃС‚
+Public Const TEXTS_SUBTOTAL = "РџРћР”Р«РўРћР“"
+Public Const TEXTS_TOTAL = "РРўРћР“Рћ"
+Public Const TEXTS_NOT_SUBJECT_VAT = "РќР”РЎ РЅРµ РѕР±Р»Р°РіР°РµС‚СЃСЏ РІ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРё СЃ РїРї.26 С‡.2 СЃС‚.149 РќРљ Р Р¤"
+Public Const TEXTS_SUBJECT_VAT = "РІ С‚.С‡. РќР”РЎ 18%"
+Public Const TEXTS_NOTICE_MARGIN = "РјР°СЂР¶Р° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ 100%"
+Public Const TEXTS_NOTICE_MARKUP = "РЅР°С†РµРЅРєР° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РјРµРЅСЊС€Рµ -100%"
+Public Const TEXTS_MOTTO = "IT-РРќРўР•Р“Р РђРўРћР " & vbCrLf & "РЎ РџРћР›РќР«Рњ РџР РР’РћР”РћРњ"
+Public Const TEXTS_ADDRESS = "117587, Рі. РњРѕСЃРєРІР°" & vbCrLf & "Р’Р°СЂС€Р°РІСЃРєРѕРµ С€РѕСЃСЃРµ, Рґ. 125Р–, РєРѕСЂРї. 6" & vbCrLf & "sales@4by4.ru, +7 (499) 753-23-44"
+Public Const TEXTS_4X4_SHORT = "РћРћРћ ""4С…4 РЈРљ"""
+Public Const TEXTS_4X4_LONG = "РћР±С‰РµСЃС‚РІРѕ СЃ РѕРіСЂР°РЅРёС‡РµРЅРЅРѕР№ РѕС‚РІРµС‚СЃС‚РІРµРЅРЅРѕСЃС‚СЊСЋ ""4С…4 СѓРїСЂР°РІР»СЏСЋС‰Р°СЏ РєРѕРјРїР°РЅРёСЏ"""
+Public Const TEXTS_FROM = "РћС‚: "
+Public Const TEXTS_REFERENCE = "РСЃС…. в„–_________" & vbCrLf & "РѕС‚ "
+Public Const TEXTS_WHOM = "РљРѕРјСѓ: "
+Public Const TEXTS_SALES_OFFER = "РљРћРњРњР•Р Р§Р•РЎРљРћР• РџР Р•Р”Р›РћР–Р•РќРР•"
+Public Const TEXTS_PITCH = "РіРѕС‚РѕРІРѕ РїРµСЂРµРґР°С‚СЊ РўРѕРІР°СЂ Рё (РёР»Рё) РІС‹РїРѕР»РЅРёС‚СЊ Р Р°Р±РѕС‚С‹ СЃРѕРіР»Р°СЃРЅРѕ СЃРїРµС†РёС„РёРєР°С†РёРё:"
+Public Const TEXTS_TERMS_OF_PAYMENT = "РЈСЃР»РѕРІРёСЏ РѕРїР»Р°С‚С‹:"
+Public Const TEXTS_TERMS_OF_SERVICE = "РЈСЃР»РѕРІРёСЏ РїРѕСЃС‚Р°РІРєРё/РІС‹РїРѕР»РЅРµРЅРёСЏ СЂР°Р±РѕС‚:"
+Public Const TEXTS_DELIVERY_INCLUDED = "СЃС‚РѕРёРјРѕСЃС‚СЊ РґРѕСЃС‚Р°РІРєРё РІРєР»СЋС‡РµРЅР° РІ СЃС‚РѕРёРјРѕСЃС‚СЊ РѕР±РѕСЂСѓРґРѕРІР°РЅРёСЏ"
+Public Const TEXTS_DELIVERY_NOT_INCLUDED = "СЃС‚РѕРёРјРѕСЃС‚СЊ РѕР±РѕСЂСѓРґРѕРІР°РЅРёСЏ РЅРµ РІРєР»СЋС‡Р°РµС‚ СЃС‚РѕРёРјРѕСЃС‚СЊ РґРѕСЃС‚Р°РІРєРё Рё СЂР°Р·РіСЂСѓР·РѕС‡РЅС‹С… СЂР°Р±РѕС‚"
 Public Const TEXTS_WORK_TITLE = "_______________________"
 Public Const TEXTS_SIGN = "____________________"
-Public Const TEXTS_LOCUS_SIGILI = "М.П."
+Public Const TEXTS_LOCUS_SIGILI = "Рњ.Рџ."
 
 ' MS Word constants
 Public Const wdWindowStateMaximize = 1
