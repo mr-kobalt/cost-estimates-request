@@ -19,14 +19,14 @@ Private Sub Worksheet_Change(ByVal Target As Range)
 ' 4. Любое изменение ячеек с датой по ЦБ РФ и курсов USD/EUR на эту дату ведёт к
 '    обновлению значения этих ячеек с сайта ЦБ РФ
 ' -------------------------------------------------------------------------------- '
-    Dim isect As Range, priceRange As Range
+    Dim isect As Range, priceRange As Range, cell As Range
     Dim undoControl As Object
     Dim i As Long
 
     On Error GoTo ErrorHandler
 
-    Application.EnableEvents = False
-    'changeUpdatingState False
+    'Application.EnableEvents = False
+    changeUpdatingState False
 
     ' Перехватываем вставку и вставляем в ячейки только значения и формулы, но не форматирование и пр.
     ' Адаптированное решение подсмотренное здесь:
@@ -70,7 +70,7 @@ Private Sub Worksheet_Change(ByVal Target As Range)
         End If
     End If
 
-    With Application.Worksheets(PURCHASE_SHEET_NAME)
+    With ThisWorkbook.Sheets(SPEC_SHEET_NAME)
         On Error GoTo ErrorHandler2
         With .Range(PURCHASE_TABLE_NAME)
             Set priceRange = Union(.columns(PurchaseColumns.PRICE_GPL), _
@@ -84,35 +84,45 @@ Private Sub Worksheet_Change(ByVal Target As Range)
         If Not (isect Is Nothing) Then: convertCellsValueToDbl isect
 
 
-        ' Если вставляем или вводим данные в ячейку с Валютой расчёта (CALC_CURRENCY_CELL_NAME),
+        ' Если вставляем или вводим данные в ячейку с Валютой расчёта (SALES_CURRENCY_CELL_NAME),
         ' то копируем новое значение в выпадающий список на листе Расчёт продажи (SALES_SHEET_NAME)
-        Set isect = Application.Intersect(Target, .Range(CALC_CURRENCY_CELL_NAME))
-        If Not (isect Is Nothing) Then
-            Application.Worksheets(SALES_SHEET_NAME).shapes(CURRENCY_SHAPE_NAME).OLEFormat.Object.Value = _
-                        Application.Match(.Range(CALC_CURRENCY_CELL_NAME).Value2, _
-                        Application.Worksheets(SERVICE_SHEET_NAME).Range(CURRENCIES_ARRAY_NAME).Value2, 0)
-        End If
+'        Set isect = Application.Intersect(Target, .Range(SALES_CURRENCY_CELL_NAME))
+'        If Not (isect Is Nothing) Then
+'            ThisWorkbook.Sheets(SALES_SHEET_NAME).shapes(CURRENCY_SHAPE_NAME).OLEFormat.Object.Value = _
+'                        Application.Match(.Range(SALES_CURRENCY_CELL_NAME).Value2, _
+'                        ThisWorkbook.Sheets(SERVICE_SHEET_NAME).Range(CURRENCIES_ARRAY_NAME).Value2, 0)
+'        End If
 
         ' Если вставляем или вводим данные в ячейку-индикатор включения НДС в расчёт (INCLUDE_VAT_CELL_NAME),
-        ' то копируем новое значение в выпадающий список на листе Расчёт продажи (SALES_SHEET_NAME)
+        ' то копируем новое значение в выпадающий список на листе Расчёт продажи (SALES_SHEET_NAME) и во все
+        ' ячейки колонки "НДС продажи" на листе расчёта, а также изменяем валидацию ячеек этой  колонки
         Set isect = Application.Intersect(Target, .Range(INCLUDE_VAT_CELL_NAME))
         If Not (isect Is Nothing) Then
-            Application.Worksheets(SALES_SHEET_NAME).shapes(VAT_SHAPE_NAME).OLEFormat.Object.Value = _
-                        Application.Match(.Range(INCLUDE_VAT_CELL_NAME).Value2, _
-                        Application.Worksheets(SERVICE_SHEET_NAME).Range(VAT_ARRAY_NAME).Value2, 0)
-            .Range(PURCHASE_TABLE_NAME).columns(PurchaseColumns.VAT_PURCHASE).Value2 = .Range(INCLUDE_VAT_CELL_NAME).Value2
+'            ThisWorkbook.Sheets(SALES_SHEET_NAME).Shapes(VAT_SHAPE_NAME).OLEFormat.Object.Value = _
+'                        Application.Match(.Range(INCLUDE_VAT_CELL_NAME).Value2, _
+'                        ThisWorkbook.Sheets(SERVICE_SHEET_NAME).Range(VAT_ARRAY_NAME).Value2, 0)
+            createValidation Target:=.Range(PURCHASE_TABLE_NAME).columns(PurchaseColumns.VAT_SALES), typename:="VAT"
+            With .Range(PURCHASE_TABLE_NAME).columns(PurchaseColumns.VAT_SALES)
+                For i = 1 To .Cells.Count
+                    If .Cells(i).Value2 <> ThisWorkbook.Sheets(SERVICE_SHEET_NAME).Range(VAT_ARRAY_NAME).Cells(3).Value2 And _
+                                            .Cells(i).Value2 <> vbNullString Then
+                        .Cells(i) = isect.Value2
+                    End If
+                Next i
+            End With
+
         End If
 
         ' Если вставляем или вводим данные в ячейку-индикатор включения стоимости доставки расчёт (INCLUDE_DELIVERY_CELL_NAME),
         ' то правим чекбокс на листе Расчёт продажи (SALES_SHEET_NAME)
-        Set isect = Application.Intersect(Target, .Range(INCLUDE_DELIVERY_CELL_NAME))
-        If Not (isect Is Nothing) Then
-            If isect.Value2 = YES Then
-                Application.Worksheets(SALES_SHEET_NAME).shapes(DELIVERY_SHAPE_NAME).OLEFormat.Object.Value = xlOn
-            Else
-                Application.Worksheets(SALES_SHEET_NAME).shapes(DELIVERY_SHAPE_NAME).OLEFormat.Object.Value = xlOff
-            End If
-        End If
+'        Set isect = Application.Intersect(Target, .Range(INCLUDE_DELIVERY_CELL_NAME))
+'        If Not (isect Is Nothing) Then
+'            If isect.Value2 = YES Then
+'                ThisWorkbook.Sheets(SALES_SHEET_NAME).shapes(DELIVERY_SHAPE_NAME).OLEFormat.Object.Value = xlOn
+'            Else
+'                ThisWorkbook.Sheets(SALES_SHEET_NAME).shapes(DELIVERY_SHAPE_NAME).OLEFormat.Object.Value = xlOff
+'            End If
+'        End If
 
         ' Если меняется ячейка с датой курса, то подгружаем значение с сайта ЦБ РФ
         Set isect = Application.Intersect(Target, .Range(CURRENT_RATE_DATE_CELL_NAME))
@@ -128,7 +138,10 @@ Private Sub Worksheet_Change(ByVal Target As Range)
 
         ' Если меняются ячейки с индексом, то корректируем их содержимое
         Set isect = Application.Intersect(Target, .Range(PURCHASE_TABLE_NAME).columns(PurchaseColumns.INDEX_NUMBER))
-        If Not (isect Is Nothing) Then: Call correctIndexRange(isect)
+        If Not (isect Is Nothing) Then
+            correctIndexRange indexRange:=isect
+            updateIndexDesc
+        End If
 
         'если меняются ячейки в таблице расчёта, то все формулы сбрасываются к значениям по умолчанию
         Set isect = Application.Intersect(Target, .Range(PURCHASE_TABLE_NAME))
@@ -143,7 +156,8 @@ CleanExit:
     Set Target = Nothing
     Set isect = Nothing
     Set priceRange = Nothing
-    Application.EnableEvents = True
+    'Application.EnableEvents = True
+    changeUpdatingState True
     Exit Sub
 
 CutHandler:
@@ -174,7 +188,7 @@ Private Sub Worksheet_SelectionChange(ByVal Target As Range)
     Application.EnableEvents = False
 
     On Error GoTo ErrorHandler2
-    With Application.Worksheets(PURCHASE_SHEET_NAME).Range(PURCHASE_TABLE_NAME)
+    With ThisWorkbook.Sheets(SPEC_SHEET_NAME).Range(PURCHASE_TABLE_NAME)
         Set priceRange = Union(.columns(PurchaseColumns.PRICE_GPL), _
                                .columns(PurchaseColumns.PRICE_PURCHASE))
         On Error GoTo ErrorHandler
@@ -192,6 +206,7 @@ Private Sub Worksheet_SelectionChange(ByVal Target As Range)
             Next cell
         End If
     End With
+
 CleanExit:
     Set Target = Nothing
     Set isect = Nothing
