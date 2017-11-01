@@ -19,7 +19,7 @@ Public Sub convertCellsValueToDbl(ByVal Target As Range)
         .Global = True
         ' шаблон соответствует всем нечисловым символам, кроме последней точки
         ' или зап€той, котора€ считаетс€ разделителем целой и дробной части
-        .Pattern = "[^\d\.\,]+|[^\d]+(?=.*[\.\,].*$)"
+        .Pattern = "[^\d\.\,]+|[\.\,]+(?=.*[\.\,].*\d.*$)|[\.\,]+(?=[^\d]*$)"
 
         For Each cell In Target.Cells
             If Not cell.HasFormula Then
@@ -27,7 +27,7 @@ Public Sub convertCellsValueToDbl(ByVal Target As Range)
                     ' если значение €чейки нельз€ преобразовать в число, то очищаем от
                     ' нечисловых символов и замен€ем дес€тичный разделитель на зап€тую
                     cell.Value2 = CDbl(Replace(.Replace(cell.Value2, vbNullString), ".", ","))
-                    If (err.number <> 0) Then: cell.Value2 = 0
+                    If (Err.number <> 0) Then: cell.Value2 = 0
                 Else
                     ' если значение €чейки можно преобразовать в число, то делаем это
                     cell.Value2 = CDbl(cell.Value2)
@@ -42,7 +42,7 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description & vbCrLf & vbCrLf _
+    MsgBox "Error " & Err.number & ": " & Err.Description & vbCrLf & vbCrLf _
             & "Ќе удалось создать объект vbscript.regexp. ќпераци€ не завершена."
     Resume CleanExit
 End Sub
@@ -58,7 +58,7 @@ Public Function convertPriceToText(number As Double, currencyType As String) As 
     
     On Error Resume Next
     str = Mid(CStr(number), 1, InStr(1, CStr(number), ",", vbTextCompare) - 1)
-    If err.number <> 0 Then
+    If Err.number <> 0 Then
         str = CStr(number)
     Else
         fraction = Left(Mid(CStr(number), InStr(1, CStr(number), ",", vbTextCompare) + 1), 2)
@@ -94,7 +94,7 @@ CleanExit:
     Exit Function
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     convertPriceToText = vbNullString
     Resume CleanExit
 End Function
@@ -256,7 +256,7 @@ Private Function numberOfDigits(number As Double) As Single
 ' возвращает количество целых разр€дов
     On Error Resume Next
     numberOfDigits = Len(Mid(CStr(number), 1, InStr(1, CStr(number), ",", vbTextCompare) - 1))
-    If err.number <> 0 Then: numberOfDigits = Len(CStr(number))
+    If Err.number <> 0 Then: numberOfDigits = Len(CStr(number))
     On Error GoTo 0
     If InStr(1, CStr(number), "-", vbTextCompare) <> 0 Then: numberOfDigits = numberOfDigits - 1
 End Function
@@ -389,13 +389,17 @@ Public Sub createFormatCondition(ByVal Target As Range, typename As String)
     Set Target = Nothing
 End Sub
 
-Private Sub createValidation(ByVal Target As Range, typename As String)
+Public Sub createValidation(ByVal Target As Range, typename As String)
     On Error GoTo ErrorHandler
     With Target.Validation
         .Delete
         Select Case typename
             Case "profit_type": .Add Type:=xlValidateList, Formula1:="=" & PROFIT_TYPE_ARRAY_NAME
             Case "calc_source": .Add Type:=xlValidateList, Formula1:="=" & CALC_SOURCE_ARRAY_NAME
+            Case "VAT": .Add Type:=xlValidateList, Formula1:=CStr(Application.Range(VAT_ARRAY_NAME). _
+                        Cells(Application.Match(Application.Range(INCLUDE_VAT_CELL_NAME).Value2, _
+                        Application.Range(VAT_ARRAY_NAME), 0)).Value2) & "," & _
+                        CStr(Application.Range(VAT_ARRAY_NAME).Cells(3).Value2)
         End Select
         .IgnoreBlank = True
         .InCellDropdown = True
@@ -406,7 +410,7 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     'changeUpdatingState True
     Resume CleanExit
 End Sub
@@ -503,17 +507,19 @@ Public Sub hideSalesColumns()
     
     'Application.EnableEvents = False
 
-    For Each shape In Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_GROUP_NAME).GroupItems
-        If shape.FormControlType = xlCheckBox Then
-            column = findColNumber(getDesiredColumns(), shape.AlternativeText) + COLUMN_OFFSET
-            
-            With Application.Worksheets(SALES_SHEET_NAME).Cells.columns(column)
-                If shape.OLEFormat.Object.Value = xlOff Then
-                    If .Hidden = False Then: .Hidden = True
-                ElseIf shape.OLEFormat.Object.Value = xlOn Then
-                    If .Hidden = True Then: .Hidden = False
-                End If
-            End With
+    For Each shape In Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_GROUP_NAME).GroupItems
+        If shape.Type = msoFormControl Then
+            If shape.FormControlType = xlCheckBox Then
+                column = findColNumber(getDesiredColumns(), shape.AlternativeText) + COLUMN_OFFSET
+                
+                With Application.Worksheets(SALES_SHEET_NAME).Cells.columns(column)
+                    If shape.OLEFormat.Object.Value = xlOff Then
+                        If .Hidden = False Then: .Hidden = True
+                    ElseIf shape.OLEFormat.Object.Value = xlOn Then
+                        If .Hidden = True Then: .Hidden = False
+                    End If
+                End With
+            End If
         End If
     Next shape
     
@@ -535,7 +541,7 @@ Public Sub formatRangeAsType(ByVal Target As Range, Optional typename As String 
         
         Case "subgroup"
             ' создаЄм подгруппу без строк подзаголовка и подытогов
-            Target.Offset(1).Resize(Target.Rows.Count - 2).EntireRow.OutlineLevel = INDEX_RANK_QTY - 1
+            Target.offset(1).Resize(Target.Rows.Count - 2).EntireRow.OutlineLevel = INDEX_RANK_QTY - 1
             
             formatRangeBasic Target.Rows(1)
             formatRangeBasic Target.Rows(Target.Rows.Count)
@@ -546,7 +552,7 @@ Public Sub formatRangeAsType(ByVal Target As Range, Optional typename As String 
         
         Case "kit"
             ' создаЄм подгруппу без строки подзаголовка
-            Target.Offset(1).Resize(Target.Rows.Count - 1).EntireRow.OutlineLevel = INDEX_RANK_QTY
+            Target.offset(1).Resize(Target.Rows.Count - 1).EntireRow.OutlineLevel = INDEX_RANK_QTY
             
             ' по умолчанию считаетс€, что им€ сборки всегда идЄт сразу после колонки
             ' с индексами
@@ -662,11 +668,11 @@ Public Sub adjustingSalesRange(ByVal Target As Range, desiredColumns As Collecti
                 Case SalesColumns.MANUFACTURER: .ColumnWidth = 15
                 Case SalesColumns.PN: .ColumnWidth = 15
                 Case SalesColumns.NAME_AND_DESCRIPTION: .ColumnWidth = 55
-                Case SalesColumns.QTY: .ColumnWidth = 6
+                Case SalesColumns.qty: .ColumnWidth = 6
                 Case SalesColumns.Unit: .ColumnWidth = 7
                 Case SalesColumns.Price: .ColumnWidth = 12
                 Case SalesColumns.total: .ColumnWidth = 12
-                Case SalesColumns.VAT: .ColumnWidth = 12
+                Case SalesColumns.vat: .ColumnWidth = 12
                 Case SalesColumns.DELIVERY_TIME: .ColumnWidth = 12
                 Case SalesColumns.BLANK: .ColumnWidth = 5
                 Case SalesColumns.Row: .ColumnWidth = 6
@@ -704,7 +710,7 @@ Public Sub resetFormulasInPurchaseTable(Optional column As Long = 0)
             Case PurchaseColumns.PRICE_GPL_RECALCULATED
                 cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.GPL_CURRENCY) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_GPL) & "]]"
-                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT) & "]]"
+                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.vat) & "]]"
                 cell4 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT_PURCHASE) & "]]"
                 
                 .columns(PurchaseColumns.PRICE_GPL_RECALCULATED).FormulaR1C1 = "=" & cell2 & "*" & "IFERROR(INDEX(" & _
@@ -713,7 +719,7 @@ Public Sub resetFormulasInPurchaseTable(Optional column As Long = 0)
                         "IFERROR(INDEX(" & CALC_VAT_ARRAY_NAME & ",MATCH(" & cell4 & "," & _
                         VAT_ARRAY_NAME & ",0),MATCH(" & cell3 & "," & VAT_ARRAY_NAME & ",0)),0)"
             Case PurchaseColumns.TOTAL_GPL_RECALCULATED
-                cell1 = "RC[" & CStr(PurchaseColumns.QTY - PurchaseColumns.TOTAL_GPL_RECALCULATED) & "]"
+                cell1 = "RC[" & CStr(PurchaseColumns.qty - PurchaseColumns.TOTAL_GPL_RECALCULATED) & "]"
                 cell2 = "RC[" & CStr(PurchaseColumns.PRICE_GPL_RECALCULATED - PurchaseColumns.TOTAL_GPL_RECALCULATED) & "]"
                 
                 .columns(column).FormulaR1C1 = "=" & cell1 & "*" & cell2
@@ -725,7 +731,7 @@ Public Sub resetFormulasInPurchaseTable(Optional column As Long = 0)
             Case PurchaseColumns.PRICE_PURCHASE_RECALCULATED
                 cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PURCHASE_CURRENCY) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE) & "]]"
-                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT) & "]]"
+                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.vat) & "]]"
                 cell4 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT_PURCHASE) & "]]"
                 
                 .columns(PurchaseColumns.PRICE_PURCHASE_RECALCULATED).FormulaR1C1 = "=" & cell2 & "*" & "IFERROR(INDEX(" & _
@@ -735,35 +741,50 @@ Public Sub resetFormulasInPurchaseTable(Optional column As Long = 0)
                         VAT_ARRAY_NAME & ",0),MATCH(" & cell3 & "," & VAT_ARRAY_NAME & ",0)),0)"
                     
             Case PurchaseColumns.TOTAL_PURCHASE_RECALCULATED
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
-                cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE_RECALCULATED) & "]]"
-                
-                .columns(column).FormulaR1C1 = "=" & cell1 & "*" & cell2
+'                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
+'                cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE_RECALCULATED) & "]]"
+'
+'                .columns(column).FormulaR1C1 = "=" & cell1 & "*" & cell2
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.INDEX_NUMBER) & "]]"
+                cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.INDEX_DESC) & "]]"
+                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
+                cell4 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE_RECALCULATED) & "]]"
+                .columns(column).FormulaR1C1 = "=IF(OR(" & cell2 & "=""" & TEXTS_SUBTITLE & """," & cell1 & "=""""),0," & cell3 & "*" & cell4 & ")"
             Case PurchaseColumns.TOTAL_WEIGHT
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.UNIT_WEIGHT) & "]]"
                 
                 .columns(column).FormulaR1C1 = "=" & cell1 & "*" & cell2
             Case PurchaseColumns.TOTAL_VOLUME
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.UNIT_VOLUME) & "]]"
                 
                 .columns(column).FormulaR1C1 = "=" & cell1 & "*" & cell2
             Case PurchaseColumns.TOTAL_GPL
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_GPL) & "]]"
                 
                 .columns(column).FormulaR1C1 = "=" & cell1 & "*" & cell2
             Case PurchaseColumns.TOTAL_PURCHASE
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE) & "]]"
-                
+    
                 .columns(column).FormulaR1C1 = "=" & cell1 & "*" & cell2
+
+            Case PurchaseColumns.VAT_PURCHASE_AMOUNT
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.TOTAL_PURCHASE_RECALCULATED) & "]]"
+                cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT_PURCHASE) & "]]"
+                
+                .columns(column).FormulaR1C1 = "=ROUND(" & cell1 & _
+                                            "*IF(" & cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",1),1/1.18*0.18,IF(" & _
+                                            cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",2),0.18,0))," & _
+                                            PRICE_ROUNDING_UP_TO_QTY & ")"
+                
             Case 0
                 ' PurchaseColumns.PRICE_GPL_RECALCULATED
                 cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.GPL_CURRENCY) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_GPL) & "]]"
-                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT) & "]]"
+                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.vat) & "]]"
                 cell4 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT_PURCHASE) & "]]"
                 
                 .columns(PurchaseColumns.PRICE_GPL_RECALCULATED).FormulaR1C1 = "=" & cell2 & "*" & "IFERROR(INDEX(" & _
@@ -773,7 +794,7 @@ Public Sub resetFormulasInPurchaseTable(Optional column As Long = 0)
                         VAT_ARRAY_NAME & ",0),MATCH(" & cell3 & "," & VAT_ARRAY_NAME & ",0)),0)"
                 
                 ' PurchaseColumns.TOTAL_GPL_RECALCULATED
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_GPL_RECALCULATED) & "]]"
                 .columns(PurchaseColumns.TOTAL_GPL_RECALCULATED).FormulaR1C1 = "=" & cell1 & "*" & cell2
                 
@@ -785,7 +806,7 @@ Public Sub resetFormulasInPurchaseTable(Optional column As Long = 0)
                 ' PurchaseColumns.PRICE_PURCHASE_RECALCULATED
                 cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PURCHASE_CURRENCY) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE) & "]]"
-                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT) & "]]"
+                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.vat) & "]]"
                 cell4 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT_PURCHASE) & "]]"
                 
                 .columns(PurchaseColumns.PRICE_PURCHASE_RECALCULATED).FormulaR1C1 = "=" & cell2 & "*" & "IFERROR(INDEX(" & _
@@ -795,29 +816,42 @@ Public Sub resetFormulasInPurchaseTable(Optional column As Long = 0)
                         VAT_ARRAY_NAME & ",0),MATCH(" & cell3 & "," & VAT_ARRAY_NAME & ",0)),0)"
                 
                 ' PurchaseColumns.TOTAL_PURCHASE_RECALCULATED
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
-                cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE_RECALCULATED) & "]]"
-                .columns(PurchaseColumns.TOTAL_PURCHASE_RECALCULATED).FormulaR1C1 = "=" & cell1 & "*" & cell2
+'                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
+'                cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE_RECALCULATED) & "]]"
+'                .columns(PurchaseColumns.TOTAL_PURCHASE_RECALCULATED).FormulaR1C1 = "=" & cell1 & "*" & cell2
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.INDEX_NUMBER) & "]]"
+                cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.INDEX_DESC) & "]]"
+                cell3 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
+                cell4 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE_RECALCULATED) & "]]"
+                .columns(PurchaseColumns.TOTAL_PURCHASE).FormulaR1C1 = "=IF(OR(" & cell2 & "=""" & TEXTS_SUBTITLE & """," & cell1 & "=""""),0," & cell3 & "*" & cell4 & ")"
             
                 ' PurchaseColumns.TOTAL_WEIGHT
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.UNIT_WEIGHT) & "]]"
                 .columns(PurchaseColumns.TOTAL_WEIGHT).FormulaR1C1 = "=" & cell1 & "*" & cell2
                 
                 ' PurchaseColumns.TOTAL_VOLUME
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.UNIT_VOLUME) & "]]"
                 .columns(PurchaseColumns.TOTAL_VOLUME).FormulaR1C1 = "=" & cell1 & "*" & cell2
                 
                 ' PurchaseColumns.TOTAL_GPL
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_GPL) & "]]"
                 .columns(PurchaseColumns.TOTAL_GPL).FormulaR1C1 = "=" & cell1 & "*" & cell2
                 
                 ' PurchaseColumns.TOTAL_PURCHASE
-                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.QTY) & "]]"
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.qty) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.PRICE_PURCHASE) & "]]"
                 .columns(PurchaseColumns.TOTAL_PURCHASE).FormulaR1C1 = "=" & cell1 & "*" & cell2
+                
+                ' PurchaseColumns.VAT_PURCHASE_AMOUNT
+                cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.TOTAL_PURCHASE_RECALCULATED) & "]]"
+                cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT_PURCHASE) & "]]"
+                .columns(PurchaseColumns.VAT_PURCHASE_AMOUNT).FormulaR1C1 = "=ROUND(" & cell1 & _
+                                            "*IF(" & cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",1),1/1.18*0.18,IF(" & _
+                                            cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",2),0.18,0))," & _
+                                            PRICE_ROUNDING_UP_TO_QTY & ")"
         End Select
     End With
 End Sub

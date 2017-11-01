@@ -9,11 +9,20 @@ Public Function parseXML(xmlURL As String, xPath As String) As String
     oXML.Load xmlURL
 
     If oXML.readystate = 4 Then
+        On Error Resume Next
         parseXML = oXML.SelectSingleNode(xPath).Text
+        On Error GoTo ErrorHandler
     Else
         parseXML = vbNullString
     End If
     
+CleanExit:
     Set oXML = Nothing
+    Exit Function
+ 
+ErrorHandler:
+    MsgBox "Error " & Err.number & ": " & Err.Description
+    parseXML = vbNullString
+    Resume CleanExit
 End Function
 

@@ -30,18 +30,18 @@ Private Sub Worksheet_Change(ByVal Target As Range)
         Set isect = Application.Intersect(Target, .Range(TENDER_CELL_NAME))
         If Not (isect Is Nothing) Then
             If isect.Value2 = "да" Then
-                .Range(TENDER_ARRAY_NAME).Resize(.Range(TENDER_ARRAY_NAME).Rows.Count - 3).Offset(2).EntireRow.Hidden = False
+                .Range(TENDER_ARRAY_NAME).Resize(.Range(TENDER_ARRAY_NAME).Rows.Count - 3).offset(2).EntireRow.Hidden = False
             Else
-                .Range(TENDER_ARRAY_NAME).Resize(.Range(TENDER_ARRAY_NAME).Rows.Count - 3).Offset(2).EntireRow.Hidden = True
+                .Range(TENDER_ARRAY_NAME).Resize(.Range(TENDER_ARRAY_NAME).Rows.Count - 3).offset(2).EntireRow.Hidden = True
             End If
         End If
         
         Set isect = Application.Intersect(Target, .Range(ASSURANCE_CELL_NAME))
         If Not (isect Is Nothing) Then
             If isect.Value2 = "да" Then
-                .Range(ASSURANCE_ARRAY_NAME).Resize(.Range(ASSURANCE_ARRAY_NAME).Rows.Count - 3).Offset(2).EntireRow.Hidden = False
+                .Range(ASSURANCE_ARRAY_NAME).Resize(.Range(ASSURANCE_ARRAY_NAME).Rows.Count - 3).offset(2).EntireRow.Hidden = False
             Else
-                .Range(ASSURANCE_ARRAY_NAME).Resize(.Range(ASSURANCE_ARRAY_NAME).Rows.Count - 3).Offset(2).EntireRow.Hidden = True
+                .Range(ASSURANCE_ARRAY_NAME).Resize(.Range(ASSURANCE_ARRAY_NAME).Rows.Count - 3).offset(2).EntireRow.Hidden = True
             End If
         End If
     End With
@@ -52,7 +52,7 @@ CleanExit:
     Exit Sub
 
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 

@@ -10,7 +10,7 @@ Sub createSalesOffer()
     'StartTime = Timer
     
     On Error GoTo ErrorHandler
-    Application.StatusBar = "Start making sales offer..."
+    Application.StatusBar = "Begin making the sales offer..."
     changeUpdatingState False
     
     ' Активируем и чистим лист, на котором будем формировать КП
@@ -87,11 +87,11 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
     
 ErrorHandler2:
-    MsgBox "Error " & err.number & ": " & err.Description & vbCrLf & vbCrLf _
+    MsgBox "Error " & Err.number & ": " & Err.Description & vbCrLf & vbCrLf _
             & "Не найден лист с расчётом, таблица расчёта или колонка в таблице расчёта. Операция не завершена."
     Resume CleanExit
 End Sub
@@ -108,9 +108,11 @@ Public Function getDesiredColumns() As Collection
     Set checkboxes = New Collection
     minTop = MAXSINGLE
     
-    For Each shape In Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_GROUP_NAME).GroupItems
-        If shape.FormControlType = xlCheckBox Then
-            checkboxes.Add shape, shape.AlternativeText
+    For Each shape In Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_GROUP_NAME).GroupItems
+        If shape.Type = msoFormControl Then
+            If shape.FormControlType = xlCheckBox Then
+                checkboxes.Add shape, shape.AlternativeText
+            End If
         End If
     Next shape
     
@@ -161,10 +163,12 @@ Private Function findCheckboxName(query As String) As Variant
     Dim shape As shape
     findCheckboxName = Null
     
-    For Each shape In Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_GROUP_NAME).GroupItems
-        If shape.FormControlType = xlCheckBox And shape.AlternativeText = query Then
-            findCheckboxName = shape.OLEFormat.Object.Text
-            Exit Function
+    For Each shape In Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_GROUP_NAME).GroupItems
+        If shape.Type = msoFormControl Then
+            If shape.FormControlType = xlCheckBox And shape.AlternativeText = query Then
+                findCheckboxName = shape.OLEFormat.Object.Text
+                Exit Function
+            End If
         End If
     Next shape
 End Function
@@ -175,7 +179,7 @@ Private Function insHeader(ByVal salesRange As Range, desiredColumns As Collecti
     
     salesRange.Cells(1).EntireRow.Insert
     'Set insHeader = salesRange.Resize(1, findColNumber(desiredColumns, SalesColumns.BLANK) - 1).Offset(-1)
-    Set insHeader = salesRange.Resize(1).Offset(-1)
+    Set insHeader = salesRange.Resize(1).offset(-1)
     
     For i = 1 To insHeader.Cells.Count
         name = findCheckboxName(CStr(desiredColumns.Item(i)))
@@ -195,15 +199,15 @@ Private Function insHeader(ByVal salesRange As Range, desiredColumns As Collecti
                                                  CURRENCIES_HEADER_ARRAY_NAME & ",MATCH(" & CALC_CURRENCY_CELL_NAME & _
                                                  "," & CURRENCIES_ARRAY_NAME & ",0))"
                                                  
-            Case i = SalesColumns.VAT:
+            Case i = SalesColumns.vat:
                 insHeader.Cells(i).FormulaR1C1 = "=""" & insHeader.Cells(i).Value2 & ", ""&INDEX(" & _
                                                  CURRENCIES_HEADER_ARRAY_NAME & ",MATCH(" & _
                                                  CALC_CURRENCY_CELL_NAME & "," & CURRENCIES_ARRAY_NAME & ",0))"
         End Select
     Next
     
-    Set insHeader = Union(salesRange.Resize(1, findColNumber(desiredColumns, SalesColumns.BLANK) - 1).Offset(-1), _
-                          salesRange.Resize(1, findColNumber(desiredColumns, SalesColumns.[_LAST] - 1) - findColNumber(desiredColumns, SalesColumns.BLANK) - 1).Offset(-1, _
+    Set insHeader = Union(salesRange.Resize(1, findColNumber(desiredColumns, SalesColumns.BLANK) - 1).offset(-1), _
+                          salesRange.Resize(1, findColNumber(desiredColumns, SalesColumns.[_LAST] - 1) - findColNumber(desiredColumns, SalesColumns.BLANK) - 1).offset(-1, _
                           findColNumber(desiredColumns, SalesColumns.BLANK) + 1))
     formatRangeAsType insHeader, "header"
 End Function
@@ -214,10 +218,10 @@ Private Function insFooter(ByVal salesRange As Range, desiredColumns As Collecti
     Dim columnVAT As Long
     
     'salesRange.Rows(salesRange.Rows.Count).EntireRow.Insert
-    Set insFooter = salesRange.Resize(1, findColNumber(desiredColumns, SalesColumns.BLANK) - 1).Offset(salesRange.Rows.Count)
+    Set insFooter = salesRange.Resize(1, findColNumber(desiredColumns, SalesColumns.BLANK) - 1).offset(salesRange.Rows.Count)
     
     columnTotal = findColNumber(desiredColumns, SalesColumns.total)
-    columnVAT = findColNumber(desiredColumns, SalesColumns.VAT)
+    columnVAT = findColNumber(desiredColumns, SalesColumns.vat)
     
     insFooter.columns(columnTotal).FormulaR1C1 = "=subtotal(9," & salesRange(1, columnTotal) _
                                                 .Address(False, False, xlR1C1, , insFooter.columns(columnTotal).Cells(1)) & _
@@ -259,7 +263,7 @@ Private Function makeSalesTable(desiredColumns As Collection)
     Dim newColumn As Range
     Dim columnValue As Variant
     Dim shape As shape
-    Dim tempAddress1 As String, tempAddress2 As String, total As String
+    Dim tempAddress1 As String, tempAddress2 As String, tempAddress3 As String
     
     With Application.Worksheets(PURCHASE_SHEET_NAME).Range(PURCHASE_TABLE_NAME)
         For i = 1 To desiredColumns.Count
@@ -280,8 +284,8 @@ Private Function makeSalesTable(desiredColumns As Collection)
                     newColumn.Formula = "='" & PURCHASE_SHEET_NAME & "'!" & .columns(PurchaseColumns.NAME_AND_DESCRIPTION).Cells(1).Address(False, True, xlA1)
                     formatRangeAsType newColumn, "wo-zeros"
                     
-                Case columnValue = SalesColumns.QTY
-                    newColumn.Formula = "='" & PURCHASE_SHEET_NAME & "'!" & .columns(PurchaseColumns.QTY).Cells(1).Address(False, True, xlA1)
+                Case columnValue = SalesColumns.qty
+                    newColumn.Formula = "='" & PURCHASE_SHEET_NAME & "'!" & .columns(PurchaseColumns.qty).Cells(1).Address(False, True, xlA1)
                     formatRangeAsType newColumn, "center"
                 
                 Case columnValue = SalesColumns.Unit
@@ -293,21 +297,14 @@ Private Function makeSalesTable(desiredColumns As Collection)
                                             Cells(1).Address(False, True, xlR1C1, , newColumn.Cells(1))
                     tempAddress2 = "'" & PURCHASE_SHEET_NAME & "'!" & .columns(PurchaseColumns.PRICE_PURCHASE_RECALCULATED). _
                                             Cells(1).Address(False, True, xlR1C1, , newColumn.Cells(1))
-                    
-                    If Application.Worksheets(SALES_SHEET_NAME).shapes(GPL_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
-                        total = TOTAL_GPL_CELL_NAME
-                    ElseIf Application.Worksheets(SALES_SHEET_NAME).shapes(NET_PRICE_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
-                        total = TOTAL_COST_CELL_NAME
-                    End If
+                    tempAddress3 = "'" & PURCHASE_SHEET_NAME & "'!" & .columns(PurchaseColumns.VAT_PURCHASE). _
+                                            Cells(1).Address(False, True, xlR1C1, , newColumn.Cells(1))
                     
                     newColumn.FormulaR1C1 = "=ROUND(IF(INDEX(" & CALC_SOURCE_ARRAY_NAME & ",1)=RC" & _
                                             (findColNumber(desiredColumns, SalesColumns.CALC_SOURCE) + COLUMN_OFFSET) & _
                                             "," & tempAddress1 & "," & tempAddress2 & ")*IF(" & INCLUDE_DELIVERY_CELL_NAME & _
-                                            "=""да""" & ",(1+" & DELIVERY_COST_CELL_NAME & "/" & total & _
-                                            "*INDEX(" & CALC_CURRENCIES_ARRAY_NAME & ",MATCH(" & CALC_CURRENCY_CELL_NAME & _
-                                            "," & CURRENCIES_ARRAY_NAME & ",0),2)*INDEX(" & CALC_VAT_ARRAY_NAME & _
-                                            ",MATCH(" & INCLUDE_VAT_CELL_NAME & "," & VAT_ARRAY_NAME & _
-                                            ",0),1)),1)*IF(INDEX(" & PROFIT_TYPE_ARRAY_NAME & ",1)=RC" & _
+                                            "=""да""" & ",1+" & DELIVERY_COST_FRACTION_CELL_NAME & ",1)" & _
+                                            "*IF(INDEX(" & PROFIT_TYPE_ARRAY_NAME & ",1)=RC" & _
                                             (findColNumber(desiredColumns, SalesColumns.PROFIT_TYPE) + COLUMN_OFFSET) & _
                                             ",(1+RC" & (findColNumber(desiredColumns, SalesColumns.PROFIT) + COLUMN_OFFSET) & _
                                             "),1/(1-RC" & (findColNumber(desiredColumns, SalesColumns.PROFIT) + COLUMN_OFFSET) & _
@@ -315,15 +312,17 @@ Private Function makeSalesTable(desiredColumns As Collection)
                     formatRangeAsType newColumn, "price"
                     
                 Case columnValue = SalesColumns.total
-                    newColumn.FormulaR1C1 = "=RC" & (findColNumber(desiredColumns, SalesColumns.QTY) + COLUMN_OFFSET) & _
+                    newColumn.FormulaR1C1 = "=RC" & (findColNumber(desiredColumns, SalesColumns.qty) + COLUMN_OFFSET) & _
                                             "*RC" & (findColNumber(desiredColumns, SalesColumns.Price) + COLUMN_OFFSET)
                     formatRangeAsType newColumn, "price"
                     
-                Case columnValue = SalesColumns.VAT
+                Case columnValue = SalesColumns.vat
+                    tempAddress1 = "'" & PURCHASE_SHEET_NAME & "'!" & .columns(PurchaseColumns.VAT_PURCHASE). _
+                                            Cells(1).Address(False, True, xlR1C1, , newColumn.Cells(1))
                     newColumn.FormulaR1C1 = "=ROUND(RC" & _
                                             (findColNumber(desiredColumns, SalesColumns.total) + COLUMN_OFFSET) & _
-                                            "*IF(" & INCLUDE_VAT_CELL_NAME & "=INDEX(" & VAT_ARRAY_NAME & ",1),0.18/1.18,IF(" & _
-                                            INCLUDE_VAT_CELL_NAME & "=INDEX(" & VAT_ARRAY_NAME & ",2),0.18,0))," & _
+                                            "*IF(" & tempAddress1 & "=INDEX(" & VAT_ARRAY_NAME & ",1),0.18/1.18,IF(" & _
+                                            tempAddress1 & "=INDEX(" & VAT_ARRAY_NAME & ",2),0.18,0))," & _
                                             PRICE_ROUNDING_UP_TO_QTY & ")"
 
                     formatRangeAsType newColumn, "price"
@@ -338,31 +337,33 @@ Private Function makeSalesTable(desiredColumns As Collection)
                 Case columnValue = SalesColumns.Row
                     newColumn.Cells(1).Value2 = Mid(.Cells(1).Address(ReferenceStyle:=xlR1C1), 1, _
                                                     InStr(.Cells(1).Address(ReferenceStyle:=xlR1C1), "C") - 1)
-                    newColumn.Cells(1).AutoFill newColumn, xlFillSeries
+                    If newColumn.Cells.Count > 1 Then
+                        newColumn.Cells(1).AutoFill newColumn, xlFillSeries
+                    End If
                     formatRangeAsType newColumn, "center"
                 
                 Case columnValue = SalesColumns.PROFIT_TYPE
-                    If Application.Worksheets(SALES_SHEET_NAME).shapes(MARKUP_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
-                        Set shape = Application.Worksheets(SALES_SHEET_NAME).shapes(MARKUP_SHAPE_NAME)
-                    ElseIf Application.Worksheets(SALES_SHEET_NAME).shapes(MARGIN_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
-                        Set shape = Application.Worksheets(SALES_SHEET_NAME).shapes(MARGIN_SHAPE_NAME)
+                    If Application.Worksheets(SALES_SHEET_NAME).Shapes(MARKUP_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
+                        Set shape = Application.Worksheets(SALES_SHEET_NAME).Shapes(MARKUP_SHAPE_NAME)
+                    ElseIf Application.Worksheets(SALES_SHEET_NAME).Shapes(MARGIN_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
+                        Set shape = Application.Worksheets(SALES_SHEET_NAME).Shapes(MARGIN_SHAPE_NAME)
                     End If
                     
                     newColumn.Value2 = shape.AlternativeText
                     formatRangeAsType newColumn, "profit_type"
                     
                 Case columnValue = SalesColumns.CALC_SOURCE
-                    If Application.Worksheets(SALES_SHEET_NAME).shapes(GPL_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
-                        Set shape = Application.Worksheets(SALES_SHEET_NAME).shapes(GPL_SHAPE_NAME)
-                    ElseIf Application.Worksheets(SALES_SHEET_NAME).shapes(NET_PRICE_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
-                        Set shape = Application.Worksheets(SALES_SHEET_NAME).shapes(NET_PRICE_SHAPE_NAME)
+                    If Application.Worksheets(SALES_SHEET_NAME).Shapes(GPL_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
+                        Set shape = Application.Worksheets(SALES_SHEET_NAME).Shapes(GPL_SHAPE_NAME)
+                    ElseIf Application.Worksheets(SALES_SHEET_NAME).Shapes(NET_PRICE_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
+                        Set shape = Application.Worksheets(SALES_SHEET_NAME).Shapes(NET_PRICE_SHAPE_NAME)
                     End If
                     
                     newColumn.Value2 = shape.AlternativeText
                     formatRangeAsType newColumn, "calc_source"
                     
                 Case columnValue = SalesColumns.PROFIT
-                    newColumn.Value2 = CDbl(Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_BUTTON_SHAPE_NAME) _
+                    newColumn.Value2 = CDbl(Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_BUTTON_SHAPE_NAME) _
                                             .OLEFormat.Object.Caption) / 100
                     formatRangeAsType newColumn, "percent"
                     createProfitFormatCondition newColumn
@@ -394,8 +395,16 @@ Private Function delEmptyRows(ByVal toClearRange As Range)
     Dim rc As Long
     
     On Error Resume Next
-    Set delRange = toClearRange.columns(1).SpecialCells(xlCellTypeBlanks)
-    isError = (err.number <> 0)
+    If toClearRange.Rows.Count = 1 Then
+        If IsEmpty(toClearRange.columns(1).Value2) Then
+            Set delRange = toClearRange
+        Else
+            isError = True
+        End If
+    Else
+        Set delRange = toClearRange.columns(1).SpecialCells(xlCellTypeBlanks)
+        isError = (Err.number <> 0)
+    End If
     On Error GoTo 0
     
     If isError Then
@@ -730,16 +739,19 @@ Private Function parseSalesRange(ByVal salesRange As Range, desiredColumns As Co
             If tempRegExp.Count = 1 And i <= salesRange.Rows.Count Then
                 If currentGroup <> tempRegExp(0) Then
                     currentGroup = tempRegExp(0)
-                    For j = i + 1 To salesRange.Rows.Count
-                        Set tempRegExp = .Execute(salesRange(j, 1).Value2)
-                        If tempRegExp.Count > 0 Then
-                            If currentGroup <> tempRegExp(0) Then: Exit For
-                        End If
-                    Next j
                     
-                    If (j - 1) - i > 0 Then: Set salesRange = makeSubGroup(salesRange, i, j, desiredColumns)
+                    If currentGroup <> salesRange(i + 1, 1).Value2 Then
+                        For j = i + 1 To salesRange.Rows.Count
+                            Set tempRegExp = .Execute(salesRange(j, 1).Value2)
+                            If tempRegExp.Count > 0 Then
+                                If currentGroup <> tempRegExp(0) Then: Exit For
+                            End If
+                        Next j
+                        
+                        If (j - 1) - i > 0 Then: Set salesRange = makeSubGroup(salesRange, i, j, desiredColumns)
+                    End If
                 End If
-                ElseIf tempRegExp.Count > 1 Then
+            ElseIf tempRegExp.Count > 1 Then
                 ' Преобразуем последнюю числовую группу в число. Если оно равно нулю, то
                 ' делаем сборку. Пример:
                 ' "123.12.000" -> "000" -> 0 = 0
@@ -821,7 +833,7 @@ Private Function makeSubGroup(ByRef salesRange As Range, firstRow As Long, lastR
                             salesRange(firstRow, column) _
                             .Address(False, False, xlR1C1, , .Cells(1)) & _
                            ":R[-1]C)"
-            salesRange(lastRow, findColNumber(desiredColumns, SalesColumns.VAT)).FormulaR1C1 = .FormulaR1C1
+            salesRange(lastRow, findColNumber(desiredColumns, SalesColumns.vat)).FormulaR1C1 = .FormulaR1C1
         End With
     End With
     
@@ -833,21 +845,20 @@ Private Sub makeKit(ByVal kitRange As Range, desiredColumns As Collection)
     Dim column As Range
     Dim columnName As Variant, columnNumberQty As Variant, columnNumberName As Variant
     Dim tempAddress1 As String, tempAddress2 As String, tempAddress3 As String, tempFormula As String
-    Dim total As String
     
     On Error GoTo ErrorHandler
     If kitRange.Rows.Count > 1 Then
-        columnNumberQty = findColNumber(desiredColumns, SalesColumns.QTY)
+        columnNumberQty = findColNumber(desiredColumns, SalesColumns.qty)
         
         For i = 1 To findColNumber(desiredColumns, SalesColumns.BLANK) - 1
             With kitRange.columns(i)
                 columnName = desiredColumns.Item(i)
                 Select Case True
                     Case columnName = SalesColumns.NAME_AND_DESCRIPTION
-                        Set column = kitRange.columns(i).Resize(kitRange.Rows.Count - 1).Offset(1)
+                        Set column = kitRange.columns(i).Resize(kitRange.Rows.Count - 1).offset(1)
                         
                         tempAddress1 = Application.Worksheets(PURCHASE_SHEET_NAME).Range(PURCHASE_TABLE_NAME) _
-                                     .columns(PurchaseColumns.QTY).Cells(1).Address(False, True, xlR1C1, , column.Cells(1))
+                                     .columns(PurchaseColumns.qty).Cells(1).Address(False, True, xlR1C1, , column.Cells(1))
                         tempAddress2 = Application.Worksheets(PURCHASE_SHEET_NAME).Range(PURCHASE_TABLE_NAME) _
                                      .columns(PurchaseColumns.Unit).Cells(1).Address(False, True, xlR1C1, , column.Cells(1))
                         
@@ -862,10 +873,10 @@ Private Sub makeKit(ByVal kitRange As Range, desiredColumns As Collection)
                                                      Mid(tempAddress2, InStr(tempAddress2, "C") + 1)
                         Next j
         
-                    Case columnName = SalesColumns.QTY
+                    Case columnName = SalesColumns.qty
                         If .Cells(1).Value2 = 0 Then
                             tempAddress1 = Application.Worksheets(PURCHASE_SHEET_NAME).Range(PURCHASE_TABLE_NAME) _
-                                     .columns(PurchaseColumns.QTY).Cells(1).Address(False, True, xlR1C1, , .Cells(1))
+                                     .columns(PurchaseColumns.qty).Cells(1).Address(False, True, xlR1C1, , .Cells(1))
                             tempAddress1 = Mid(tempAddress1, InStr(tempAddress1, "C") + 1)
                             tempFormula = "=GCD("
                             
@@ -880,7 +891,7 @@ Private Sub makeKit(ByVal kitRange As Range, desiredColumns As Collection)
                             .Cells(1).FormulaR1C1 = tempFormula & ")"
                         End If
                         
-                        .Resize(kitRange.Rows.Count - 1).Offset(1).ClearContents
+                        .Resize(kitRange.Rows.Count - 1).offset(1).ClearContents
                         .Merge
                         
                     Case columnName = SalesColumns.Unit
@@ -893,19 +904,12 @@ Private Sub makeKit(ByVal kitRange As Range, desiredColumns As Collection)
                                      .columns(PurchaseColumns.TOTAL_GPL_RECALCULATED).Cells(1).Address(False, True, xlR1C1, , .Cells(1))
                         tempAddress2 = Application.Worksheets(PURCHASE_SHEET_NAME).Range(PURCHASE_TABLE_NAME) _
                                      .columns(PurchaseColumns.TOTAL_PURCHASE_RECALCULATED).Cells(1).Address(False, True, xlR1C1, , .Cells(1))
+                        tempAddress3 = Application.Worksheets(PURCHASE_SHEET_NAME).Range(PURCHASE_TABLE_NAME) _
+                                     .columns(PurchaseColumns.VAT_PURCHASE).Cells(1).Address(False, True, xlR1C1, , .Cells(1))
                         
-                        If Application.Worksheets(SALES_SHEET_NAME).shapes(GPL_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
-                            total = TOTAL_GPL_CELL_NAME
-                        ElseIf Application.Worksheets(SALES_SHEET_NAME).shapes(NET_PRICE_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
-                            total = TOTAL_COST_CELL_NAME
-                        End If
-                        tempFormula = "=ROUND(IF(" & INCLUDE_DELIVERY_CELL_NAME & "=""да""" & ",(1+" & _
-                                        DELIVERY_COST_CELL_NAME & "/" & total & "*INDEX(" & _
-                                        CALC_CURRENCIES_ARRAY_NAME & ",MATCH(" & CALC_CURRENCY_CELL_NAME & _
-                                        "," & CURRENCIES_ARRAY_NAME & ",0),2)*INDEX(" & CALC_VAT_ARRAY_NAME & _
-                                        ",MATCH(" & INCLUDE_VAT_CELL_NAME & "," & VAT_ARRAY_NAME & ",0),1)),1)*SUM("
-                                        
-                        
+                        tempFormula = "=ROUND(IF(" & INCLUDE_DELIVERY_CELL_NAME & _
+                                            "=""да""" & ",1+" & DELIVERY_COST_FRACTION_CELL_NAME & ",1)*SUM("
+                                            
                         For j = 1 To .Rows.Count
                             tempFormula = tempFormula & "IF(INDEX(" & CALC_SOURCE_ARRAY_NAME & ",1)=R[" & CStr(j - 1) & "]C" & _
                                            (findColNumber(desiredColumns, SalesColumns.CALC_SOURCE) + COLUMN_OFFSET) & _
@@ -928,18 +932,18 @@ Private Sub makeKit(ByVal kitRange As Range, desiredColumns As Collection)
                                                 "," & PRICE_ROUNDING_UP_TO_QTY & ")"
                     
                     Case columnName = SalesColumns.total
-                        .Resize(kitRange.Rows.Count - 1).Offset(1).ClearContents
+                        .Resize(kitRange.Rows.Count - 1).offset(1).ClearContents
                         .Merge
                         
-                    Case columnName = SalesColumns.VAT
-                        .Resize(kitRange.Rows.Count - 1).Offset(1).ClearContents
+                    Case columnName = SalesColumns.vat
+                        .Resize(kitRange.Rows.Count - 1).offset(1).ClearContents
                         .Merge
                 End Select
             End With
         Next i
         
         tempFormula = kitRange(1, findColNumber(desiredColumns, SalesColumns.NAME_AND_DESCRIPTION)).FormulaR1C1
-        With Application.Worksheets(SALES_SHEET_NAME).Range(kitRange(1, SalesColumns.INDEX_NUMBER + 1), kitRange(1, findColNumber(desiredColumns, SalesColumns.QTY) - 1))
+        With Application.Worksheets(SALES_SHEET_NAME).Range(kitRange(1, SalesColumns.INDEX_NUMBER + 1), kitRange(1, findColNumber(desiredColumns, SalesColumns.qty) - 1))
                 .ClearContents
                 .Merge
                 .FormulaR1C1 = tempFormula
@@ -954,8 +958,52 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
+End Sub
+
+Public Sub updateIndexDesc()
+    Dim indexRange As Range
+    Dim indexValue As Variant
+    Dim indexArray() As Variant
+    Dim indexLen As Long
+    Dim i As Long, j As Long
+    
+    With ThisWorkbook.Sheets(PURCHASE_SHEET_NAME).Range(PURCHASE_TABLE_NAME)
+        Set indexRange = .columns(PurchaseColumns.INDEX_NUMBER)
+        
+        If isArrayEmpty(indexRange.Value2) Then
+            ReDim indexArray(1, 1)
+            indexArray(1, 1) = indexRange.Value2
+        Else
+            indexArray = indexRange.Value2
+        End If
+        
+        For i = 1 To .Rows.Count
+            indexValue = indexArray(i, 1)
+            If Not IsEmpty(indexValue) Then
+                If indexValue <> vbNullString And InStr(1, indexValue, ".") = 0 Then
+                    indexLen = Len(indexValue) + 1
+                    For j = 1 To .Rows.Count
+                        If (indexValue & ".") = Left(indexArray(j, 1), indexLen) Then
+                            .columns(PurchaseColumns.INDEX_DESC).Cells(i).Value2 = TEXTS_SUBTITLE
+                            Exit For
+                        End If
+                    Next j
+                    
+                    If j >= .Rows.Count Then
+                        .columns(PurchaseColumns.INDEX_DESC).Cells(i).Value2 = vbNullString
+                    End If
+                ElseIf Right(indexValue, 2) = ".0" Then
+                    .columns(PurchaseColumns.INDEX_DESC).Cells(i).Value2 = TEXTS_ASSEMBLY
+                ElseIf Not IsEmpty(.columns(PurchaseColumns.INDEX_DESC).Cells(i).Value2) Then
+                    .columns(PurchaseColumns.INDEX_DESC).Cells(i).Value2 = vbNullString
+                End If
+            Else
+                .columns(PurchaseColumns.INDEX_DESC).Cells(i).Value2 = vbNullString
+            End If
+        Next i
+    End With
 End Sub
 
 Public Function isArrayEmpty(anArray As Variant) As Boolean
@@ -969,8 +1017,8 @@ Public Function isArrayEmpty(anArray As Variant) As Boolean
     
     On Error Resume Next
     i = UBound(anArray, 1) ' Just try it. If it fails, Err.Number will be nonzero.
-    isArrayEmpty = (err.number <> 0)
-    err.Clear
+    isArrayEmpty = (Err.number <> 0)
+    Err.Clear
 End Function
 
 Private Function isExist(col As Collection, key As Variant) As Boolean
@@ -979,8 +1027,8 @@ Private Function isExist(col As Collection, key As Variant) As Boolean
 ' -------------------------------------------------------------------------------- '
     On Error Resume Next
     col (key) ' Just try it. If it fails, Err.Number will be nonzero.
-    isExist = (err.number = 0)
-    err.Clear
+    isExist = (Err.number = 0)
+    Err.Clear
 End Function
 
 Private Function isExistNamedRange(rangeName As String) As Boolean
@@ -989,8 +1037,8 @@ Private Function isExistNamedRange(rangeName As String) As Boolean
 ' -------------------------------------------------------------------------------- '
     On Error Resume Next
     Application.Names.Item (rangeName)  ' Just try it. If it fails, Err.Number will be nonzero.
-    isExistNamedRange = (err.number = 0)
-    err.Clear
+    isExistNamedRange = (Err.number = 0)
+    Err.Clear
 End Function
 
 Public Function isExistShape(shapeName As String, sheetName As String) As Boolean
@@ -999,10 +1047,10 @@ Public Function isExistShape(shapeName As String, sheetName As String) As Boolea
 ' -------------------------------------------------------------------------------- '
     Dim shape As shape
     On Error Resume Next
-    Set shape = Application.Worksheets(sheetName).shapes(shapeName)
-    isExistShape = (err.number = 0)
+    Set shape = Application.Worksheets(sheetName).Shapes(shapeName)
+    isExistShape = (Err.number = 0)
     
-    err.Clear
+    Err.Clear
     Set shape = Nothing
 End Function
 

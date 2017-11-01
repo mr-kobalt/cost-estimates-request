@@ -32,9 +32,11 @@ Private Sub Workbook_Open()
     
     If oXML.readystate = 4 Then
         With Application.Worksheets(PURCHASE_SHEET_NAME)
+            On Error Resume Next
             .Range(CURRENT_RATE_DATE_CELL_NAME).Value2 = " ÛÒ ÷¡ –‘ Ì‡ " & oXML.SelectSingleNode(CURRENT_RATE_DATE_XPATH).Text
             .Range(USD_RATE_CELL_NAME).Value2 = Replace(oXML.SelectSingleNode(USD_RATE_XPATH).Text, ",", ".")
             .Range(EUR_RATE_CELL_NAME).Value2 = Replace(oXML.SelectSingleNode(EUR_RATE_XPATH).Text, ",", ".")
+            On Error GoTo ErrorHandler
         End With
     End If
 
@@ -44,6 +46,6 @@ CleanExit:
     Exit Sub
 
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub

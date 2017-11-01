@@ -28,7 +28,7 @@ CleanExit:
     Exit Sub
 
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Desctription
+    MsgBox "Error " & Err.number & ": " & Err.Desctription
     Resume CleanExit
 End Sub
 
@@ -44,7 +44,7 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 
@@ -70,20 +70,22 @@ End Sub
 Public Sub addRows(Optional rowCount As Long = 1, Optional pos As String = "last")
     Dim leftBorderRange As Range
     Dim rightBorderRange As Range
+    Dim offset As Long
 
-    Application.EnableEvents = False
+    changeUpdatingState False
     On Error GoTo ErrorHandler
     
     With Application.Worksheets(PURCHASE_SHEET_NAME)
-        .ListObjects(DELIVERY_TABLE_NAME).Range.Cut Destination:=.Cells(.ListObjects(DELIVERY_TABLE_NAME).Range.Row + rowCount, 1)
+        offset = .ListObjects(PURCHASE_TABLE_NAME).Range.Rows.Count + rowCount
+        .ListObjects(DELIVERY_TABLE_NAME).Range.Cut Destination:=.Cells(.ListObjects(DELIVERY_TABLE_NAME).Range.Row + offset, 1)
         
         If pos = "last" Then
-            Application.ActiveSheet.ListObjects(PURCHASE_TABLE_NAME).TotalsRowRange.EntireRow.Resize(rowCount).Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+            .ListObjects(PURCHASE_TABLE_NAME).TotalsRowRange.EntireRow.Resize(rowCount).Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
         Else
-            Application.ActiveSheet.ListObjects(PURCHASE_TABLE_NAME).DataBodyRange.Rows(1).EntireRow.Resize(rowCount).Insert Shift:=xlDown, CopyOrigin:=xlFormatFromRightOrBelow
+            .ListObjects(PURCHASE_TABLE_NAME).DataBodyRange.Rows(1).EntireRow.Resize(rowCount).Insert Shift:=xlDown, CopyOrigin:=xlFormatFromRightOrBelow
         End If
         
-        .ListObjects(DELIVERY_TABLE_NAME).Range.Cut Destination:=.Cells(.ListObjects(DELIVERY_TABLE_NAME).Range.Row - rowCount, 1)
+        .ListObjects(DELIVERY_TABLE_NAME).Range.Cut Destination:=.Cells(.ListObjects(DELIVERY_TABLE_NAME).Range.Row - offset, 1)
         
         With .Range(PURCHASE_TABLE_NAME)
             Set leftBorderRange = Application.Union(.columns(PurchaseColumns.PRICE_GPL_RECALCULATED), _
@@ -93,7 +95,7 @@ Public Sub addRows(Optional rowCount As Long = 1, Optional pos As String = "last
             Set rightBorderRange = Application.Union(.columns(PurchaseColumns.TOTAL_GPL_RECALCULATED), _
                                                      .columns(PurchaseColumns.VAT_PURCHASE), _
                                                      .columns(PurchaseColumns.PRICE_GPL), _
-                                                     .columns(PurchaseColumns.VAT))
+                                                     .columns(PurchaseColumns.vat))
             With leftBorderRange.Borders(xlEdgeLeft)
                 .LineStyle = xlContinuous
                 .ColorIndex = 0
@@ -112,11 +114,11 @@ Public Sub addRows(Optional rowCount As Long = 1, Optional pos As String = "last
 CleanExit:
     Set leftBorderRange = Nothing
     Set rightBorderRange = Nothing
-    Application.EnableEvents = True
+    changeUpdatingState True
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 
@@ -130,14 +132,14 @@ Private Sub CurrencyComboBox_Change()
     On Error GoTo ErrorHandler
     Application.Worksheets(PURCHASE_SHEET_NAME).Range(CALC_CURRENCY_CELL_NAME).Value2 = _
                         Application.Range(CURRENCIES_ARRAY_NAME).Cells(Application.Worksheets(SALES_SHEET_NAME) _
-                       .shapes(CURRENCY_SHAPE_NAME).OLEFormat.Object.Value)
+                       .Shapes(CURRENCY_SHAPE_NAME).OLEFormat.Object.Value)
 
 CleanExit:
     Application.EnableEvents = True
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 
@@ -149,7 +151,7 @@ Private Sub DeliveryCostsCheckbox_Change()
     Application.EnableEvents = False
     
     On Error GoTo ErrorHandler
-    If Application.Worksheets(SALES_SHEET_NAME).shapes(DELIVERY_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
+    If Application.Worksheets(SALES_SHEET_NAME).Shapes(DELIVERY_SHAPE_NAME).OLEFormat.Object.Value = xlOn Then
         Application.Worksheets(PURCHASE_SHEET_NAME).Range(INCLUDE_DELIVERY_CELL_NAME).Value2 = YES
     Else
         Application.Worksheets(PURCHASE_SHEET_NAME).Range(INCLUDE_DELIVERY_CELL_NAME).Value2 = NO
@@ -160,7 +162,7 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 
@@ -168,22 +170,23 @@ Private Sub VATComboBox_Change()
 ' Если вводим данные в выпадающий список VATComboBox на листе Расчёт продажи (SALES_SHEET_NAME),
 ' то копируем новое значение в ячейку с индикатором включения НДС (INCLUDE_VAT_CELL_NAME)
 
-    Application.EnableEvents = False
+    changeUpdatingState False
+    Application.EnableEvents = True
     
     On Error GoTo ErrorHandler
     With Application.Worksheets(PURCHASE_SHEET_NAME)
         .Range(INCLUDE_VAT_CELL_NAME).Value2 = _
                     Application.Range(VAT_ARRAY_NAME).Cells(Application.Worksheets(SALES_SHEET_NAME) _
-                    .shapes(VAT_SHAPE_NAME).OLEFormat.Object.Value)
-        .Range(PURCHASE_TABLE_NAME).columns(PurchaseColumns.VAT_PURCHASE).Value2 = _
-                    .Range(INCLUDE_VAT_CELL_NAME).Value2
+                    .Shapes(VAT_SHAPE_NAME).OLEFormat.Object.Value)
+'        .Range(PURCHASE_TABLE_NAME).columns(PurchaseColumns.VAT_PURCHASE).Value2 = _
+'                    .Range(INCLUDE_VAT_CELL_NAME).Value2
     End With
 CleanExit:
-    Application.EnableEvents = True
+    changeUpdatingState True
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 
@@ -195,7 +198,7 @@ Private Sub SalesColumns_Click()
     Application.EnableEvents = False
     
     On Error GoTo ErrorHandler
-    Set shape = Application.Worksheets(SALES_SHEET_NAME).shapes(Application.Caller)
+    Set shape = Application.Worksheets(SALES_SHEET_NAME).Shapes(Application.Caller)
     
     column = findColNumber(getDesiredColumns(), shape.AlternativeText) + COLUMN_OFFSET
     
@@ -212,7 +215,7 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 
@@ -228,7 +231,7 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 
@@ -248,7 +251,7 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 
@@ -262,8 +265,38 @@ Private Sub wordExportButton_Click()
     Dim i As Long
     Dim temp As String, currText As String
     Dim arr() As Variant
+    Dim revenue As Range, VATamount As Range
+    Dim cell As Range, salesRange As Range
+    Dim calcCurrency As String
+    Dim VATtype As Long
     
     On Error GoTo ErrorHandler
+
+    Set salesRange = ThisWorkbook.Sheets(SALES_SHEET_NAME).UsedRange
+    Set revenue = salesRange.Cells(salesRange.Rows.Count, findColNumber(getDesiredColumns, SalesColumns.total))
+    Set VATamount = salesRange.Cells(salesRange.Rows.Count, findColNumber(getDesiredColumns, SalesColumns.vat))
+
+    Select Case True
+        Case InStr(salesRange.Resize(1, 1).offset(salesRange.Rows.Count - 1).Value2, Application.Range(CURRENCIES_HEADER_ARRAY_NAME).Cells(1).Value2) > 0:
+            currText = Application.Range(CURRENCIES_HEADER_ARRAY_NAME).Cells(1).Value2
+            calcCurrency = Application.Range(CURRENCIES_ARRAY_NAME).Cells(1).Value2
+        Case InStr(salesRange.Resize(1, 1).offset(salesRange.Rows.Count - 1).Value2, Application.Range(CURRENCIES_HEADER_ARRAY_NAME).Cells(2).Value2) > 0:
+            currText = Application.Range(CURRENCIES_HEADER_ARRAY_NAME).Cells(2).Value2
+            calcCurrency = Application.Range(CURRENCIES_ARRAY_NAME).Cells(2).Value2
+        Case InStr(salesRange.Resize(1, 1).offset(salesRange.Rows.Count - 1).Value2, Application.Range(CURRENCIES_HEADER_ARRAY_NAME).Cells(3).Value2) > 0:
+            currText = Application.Range(CURRENCIES_HEADER_ARRAY_NAME).Cells(3).Value2
+            calcCurrency = Application.Range(CURRENCIES_ARRAY_NAME).Cells(3).Value2
+    End Select
+    
+    Select Case True
+        Case InStr(salesRange.Resize(1, 1).offset(salesRange.Rows.Count - 1).Value2, Application.Range(VAT_ARRAY_NAME).Cells(1).Value2) > 0:
+            VATtype = 1
+        Case InStr(salesRange.Resize(1, 1).offset(salesRange.Rows.Count - 1).Value2, Application.Range(VAT_ARRAY_NAME).Cells(2).Value2) > 0:
+            VATtype = 2
+        Case InStr(salesRange.Resize(1, 1).offset(salesRange.Rows.Count - 1).Value2, TEXTS_NOT_SUBJECT_VAT) > 0:
+            VATtype = 3
+    End Select
+
     Set wdApp = CreateObject("Word.Application")
     Set wdDoc = wdApp.Documents.Add
     
@@ -313,7 +346,7 @@ Private Sub wordExportButton_Click()
     
         ' логотип из файла расчёта
         With .cell(1, 1)
-            ThisWorkbook.Worksheets(SERVICE_SHEET_NAME).shapes("logo").CopyPicture Appearance:=xlScreen, Format:=xlPicture
+            ThisWorkbook.Worksheets(SERVICE_SHEET_NAME).Shapes("logo").CopyPicture Appearance:=xlScreen, Format:=xlPicture
             .Range.Paste
             .Range.InlineShapes(1).ScaleHeight = 25
             .Range.InlineShapes(1).ScaleWidth = 25
@@ -391,7 +424,7 @@ Private Sub wordExportButton_Click()
     ' копируем спецификацию с листа расчёта продажи
     Set wdRng = wdDoc.Content
     With wdRng
-        ThisWorkbook.Worksheets(SALES_SHEET_NAME).Cells(ROW_OFFSET + 1, COLUMN_OFFSET + 1).CurrentRegion.Copy
+        ThisWorkbook.Sheets(SALES_SHEET_NAME).Cells(ROW_OFFSET + 1, COLUMN_OFFSET + 1).CurrentRegion.Copy
         .Collapse Direction:=wdCollapseEnd
         wdRng.PasteAndFormat wdFormatOriginalFormatting
         wdRng.MoveEnd Unit:=wdCharacter, Count:=wdDoc.Content.Characters.Count - wdRng.Start
@@ -403,21 +436,20 @@ Private Sub wordExportButton_Click()
     With wdRng
         .Collapse Direction:=wdCollapseEnd
         .ParagraphFormat.Alignment = wdAlignParagraphJustify
-        currText = Application.Range(CURRENCIES_HEADER_ARRAY_NAME).Cells(Application.Match(Application.Range(CALC_CURRENCY_CELL_NAME).Value2, _
-                                                                                           Application.Range(CURRENCIES_ARRAY_NAME), 0)).Value2
-        Select Case Application.Match(Application.Range(INCLUDE_VAT_CELL_NAME), Application.Range(VAT_ARRAY_NAME), 0)
-            Case 1: .Text = TEXTS_TOTAL & ": " & Application.Range(REVENUE_CELL_NAME).Text & " " & currText & _
-                " (" & convertPriceToText(CDbl(Application.Range(REVENUE_CELL_NAME).Value2), Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & _
-                "), " & TEXTS_SUBJECT_VAT & " " & Application.Range(VAT_AMOUNT_CELL_NAME).Text & " " & currText & _
-                 " (" & convertPriceToText(CDbl(Application.Range(VAT_AMOUNT_CELL_NAME).Value2), Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & _
+        
+        Select Case VATtype
+            Case 1: .Text = TEXTS_TOTAL & ": " & revenue.Text & " " & currText & _
+                " (" & convertPriceToText(CDbl(revenue.Value2), calcCurrency) & _
+                "), " & TEXTS_SUBJECT_VAT & " " & VATamount.Text & " " & currText & _
+                 " (" & convertPriceToText(CDbl(VATamount.Value2), calcCurrency) & _
                  ")." & vbCrLf
-            Case 2: .Text = TEXTS_TOTAL & ": " & Format(Application.Range(REVENUE_CELL_NAME).Value2 + Application.Range(VAT_AMOUNT_CELL_NAME).Value2, "# ##0.00") & " " & currText & _
-                " (" & convertPriceToText(CDbl(Application.Range(REVENUE_CELL_NAME).Value2 + Application.Range(VAT_AMOUNT_CELL_NAME).Value2), Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & _
-                "), " & TEXTS_SUBJECT_VAT & " " & Application.Range(VAT_AMOUNT_CELL_NAME).Text & " " & currText & _
-                 " (" & convertPriceToText(CDbl(Application.Range(VAT_AMOUNT_CELL_NAME).Value2), Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & _
+            Case 2: .Text = TEXTS_TOTAL & ": " & Format(revenue.Value2 + VATamount.Value2, "#,##0.00") & " " & currText & _
+                " (" & convertPriceToText(CDbl(revenue.Value2 + VATamount.Value2), calcCurrency) & _
+                "), " & TEXTS_SUBJECT_VAT & " " & VATamount.Text & " " & currText & _
+                 " (" & convertPriceToText(CDbl(VATamount.Value2), calcCurrency) & _
                  ")." & vbCrLf
-            Case 3: .Text = TEXTS_TOTAL & ": " & Application.Range(REVENUE_CELL_NAME).Text & " " & currText & _
-                " (" & convertPriceToText(CDbl(Application.Range(REVENUE_CELL_NAME).Value2), Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & _
+            Case 3: .Text = TEXTS_TOTAL & ": " & revenue.Text & " " & currText & _
+                " (" & convertPriceToText(CDbl(revenue.Value2), calcCurrency) & _
                 "), " & TEXTS_NOT_SUBJECT_VAT & "." & vbCrLf
         End Select
         
@@ -435,11 +467,9 @@ Private Sub wordExportButton_Click()
         
         arr = Application.Range(TERMS_OF_PAYMENT_ARRAY_NAME).Value2
         For i = 1 To Application.Range(TERMS_OF_PAYMENT_ARRAY_NAME).Rows.Count
-            'wdDoc.Paragraphs.Add
             .Collapse Direction:=0
-            'wdRng.MoveEnd Unit:=wdCharacter, Count:=1
-            
             temp = vbNullString
+            
             If IsEmpty(arr(i, TermsOfPaymentColumns.typename)) Then
                 temp = temp & "___"
             Else
@@ -450,19 +480,18 @@ Private Sub wordExportButton_Click()
                 temp = temp & "___"
             Else
                 temp = temp & CStr(arr(i, TermsOfPaymentColumns.PART) * 100) & "% от итоговой суммы, а именно "
-                currText = Application.Range(CURRENCIES_HEADER_ARRAY_NAME).Cells(Application.Match(Application.Range(CALC_CURRENCY_CELL_NAME).Value2, _
-                                                                                               Application.Range(CURRENCIES_ARRAY_NAME), 0)).Value2
-                Select Case Application.Match(Application.Range(INCLUDE_VAT_CELL_NAME), Application.Range(VAT_ARRAY_NAME), 0)
-                    Case 1: temp = temp & Format(Application.Range(REVENUE_CELL_NAME).Value2 * arr(i, TermsOfPaymentColumns.PART), "# ##0.00") & _
-                                    " " & currText & " (" & convertPriceToText(CDbl(Application.Range(REVENUE_CELL_NAME).Value2 * arr(i, TermsOfPaymentColumns.PART)), Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & _
-                                    "), " & TEXTS_SUBJECT_VAT & " " & Format(Application.Range(VAT_AMOUNT_CELL_NAME).Value2 * arr(i, TermsOfPaymentColumns.PART), "# ##0.00") & " " & currText & _
-                                    " (" & convertPriceToText(CDbl(Application.Range(VAT_AMOUNT_CELL_NAME).Value2 * arr(i, TermsOfPaymentColumns.PART)), Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & ")"
-                    Case 2: temp = temp & Format((Application.Range(REVENUE_CELL_NAME).Value2 + Application.Range(VAT_AMOUNT_CELL_NAME).Value2) * arr(i, TermsOfPaymentColumns.PART), "# ##0.00") & _
-                                    " " & currText & " (" & convertPriceToText(CDbl((Application.Range(REVENUE_CELL_NAME).Value2 + Application.Range(VAT_AMOUNT_CELL_NAME).Value2) * arr(i, TermsOfPaymentColumns.PART)), _
-                                    Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & "), " & TEXTS_SUBJECT_VAT & " " & Format(Application.Range(VAT_AMOUNT_CELL_NAME).Value2 * arr(i, TermsOfPaymentColumns.PART), "# ##0.00") & _
-                                    " " & currText & " (" & convertPriceToText(CDbl(Application.Range(VAT_AMOUNT_CELL_NAME).Value2 * arr(i, TermsOfPaymentColumns.PART)), Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & ")"
-                    Case 3: temp = temp & Format(Application.Range(REVENUE_CELL_NAME).Value2 * arr(i, TermsOfPaymentColumns.PART), "# ##0.00") & " " & currText & _
-                                    " (" & convertPriceToText(CDbl(Application.Range(REVENUE_CELL_NAME).Value2 * arr(i, TermsOfPaymentColumns.PART)), Application.Range(CALC_CURRENCY_CELL_NAME).Value2) & _
+                
+                Select Case VATtype
+                    Case 1: temp = temp & Format(revenue.Value2 * arr(i, TermsOfPaymentColumns.PART), "#,##0.00") & _
+                                    " " & currText & " (" & convertPriceToText(CDbl(revenue.Value2 * arr(i, TermsOfPaymentColumns.PART)), calcCurrency) & _
+                                    "), " & TEXTS_SUBJECT_VAT & " " & Format(VATamount.Value2 * arr(i, TermsOfPaymentColumns.PART), "#,##0.00") & " " & currText & _
+                                    " (" & convertPriceToText(CDbl(VATamount.Value2 * arr(i, TermsOfPaymentColumns.PART)), calcCurrency) & ")"
+                    Case 2: temp = temp & Format((revenue.Value2 + VATamount.Value2) * arr(i, TermsOfPaymentColumns.PART), "#,##0.00") & _
+                                    " " & currText & " (" & convertPriceToText(CDbl((revenue.Value2 + VATamount.Value2) * arr(i, TermsOfPaymentColumns.PART)), _
+                                    calcCurrency) & "), " & TEXTS_SUBJECT_VAT & " " & Format(VATamount.Value2 * arr(i, TermsOfPaymentColumns.PART), "#,##0.00") & _
+                                    " " & currText & " (" & convertPriceToText(CDbl(VATamount.Value2 * arr(i, TermsOfPaymentColumns.PART)), calcCurrency) & ")"
+                    Case 3: temp = temp & Format(revenue.Value2 * arr(i, TermsOfPaymentColumns.PART), "#,##0.00") & " " & currText & _
+                                    " (" & convertPriceToText(CDbl(revenue.Value2 * arr(i, TermsOfPaymentColumns.PART)), calcCurrency) & _
                                     "), " & TEXTS_NOT_SUBJECT_VAT
                 End Select
             End If
@@ -556,7 +585,7 @@ Private Sub wordExportButton_Click()
     With wdRng
         .Collapse Direction:=0
         
-        If Application.Range(INCLUDE_DELIVERY_CELL_NAME).Value2 = "да" Then
+        If Application.Range(INCLUDE_DELIVERY_CELL_NAME).Value2 = YES Then
             .Text = TEXTS_DELIVERY_INCLUDED & ";" & vbCrLf
         Else
             .Text = TEXTS_DELIVERY_NOT_INCLUDED & "." & vbCrLf
@@ -570,10 +599,19 @@ Private Sub wordExportButton_Click()
     Set wdRng = wdDoc.Content
     With wdRng
         .Collapse Direction:=0
-        .Text = Application.Range(MANAGERS_TITLES_ARRAY_NAME).Cells(Application.Match(Application.Range(PM_CELL_NAME).Value2, _
-                                                                                      Application.Range(MANAGERS_NAMES_ARRAY_NAME), 0)).Value2 & _
-                vbCrLf & TEXTS_4X4_SHORT & vbCrLf & vbCrLf & TEXTS_SIGN & " / " & Application.Range(PM_CELL_NAME).Value2 & _
+        If Application.Range(PM_CELL_NAME).Value2 = vbNullString Then
+            .Text = TEXTS_WORK_TITLE & vbCrLf & TEXTS_4X4_SHORT & vbCrLf & vbCrLf & TEXTS_SIGN & " / " & TEXTS_SIGN & _
                 " /" & vbCrLf & TEXTS_LOCUS_SIGILI
+        ElseIf Application.WorksheetFunction.CountIf(Application.Range(MANAGERS_NAMES_ARRAY_NAME), Application.Range(PM_CELL_NAME).Value2) > 0 Then
+            .Text = Application.Range(MANAGERS_TITLES_ARRAY_NAME).Cells(Application.Match(Application.Range(PM_CELL_NAME).Value2, _
+                   Application.Range(MANAGERS_NAMES_ARRAY_NAME), 0)).Value2 & _
+                   vbCrLf & TEXTS_4X4_SHORT & vbCrLf & vbCrLf & TEXTS_SIGN & " / " & _
+                   Application.Range(PM_CELL_NAME).Value2 & " /" & vbCrLf & TEXTS_LOCUS_SIGILI
+        Else
+            .Text = TEXTS_WORK_TITLE & vbCrLf & TEXTS_4X4_SHORT & vbCrLf & vbCrLf & TEXTS_SIGN & " / " & _
+                   Application.Range(PM_CELL_NAME).Value2 & " /" & vbCrLf & TEXTS_LOCUS_SIGILI
+        End If
+
         .ParagraphFormat.Alignment = wdAlignParagraphLeft
         .ParagraphFormat.SpaceAfter = 0
         .ParagraphFormat.SpaceBefore = 0
@@ -588,7 +626,7 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
 
@@ -603,7 +641,7 @@ Public Sub initializeShapes()
     margin = 8
     
     On Error Resume Next
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(BOARD_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(BOARD_SHAPE_NAME)
         .Placement = xlFreeFloating
         .Left = mainLeft
         .Top = mainTop
@@ -618,7 +656,7 @@ Public Sub initializeShapes()
         .Fill.ForeColor.RGB = RGB(255, 255, 255)
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_SUBGROUP_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_SUBGROUP_NAME)
         .Placement = xlFreeFloating
         .Left = mainLeft + margin
         .Top = mainTop + margin
@@ -627,9 +665,9 @@ Public Sub initializeShapes()
         .Visible = msoTrue
     End With
     
-    For Each shape In Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_GROUP_NAME).GroupItems
+    For Each shape In Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_GROUP_NAME).GroupItems
         If shape.FormControlType = xlCheckBox Then
-            With Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_SUBGROUP_NAME)
+            With Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_SUBGROUP_NAME)
                 shape.Placement = xlFreeFloating
                 shape.Left = .Left + margin
                 shape.Top = .Top + 2 * CInt(shape.AlternativeText) * margin - margin / 2
@@ -640,10 +678,10 @@ Public Sub initializeShapes()
         End If
     Next shape
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_SUBGROUP_NAME).Left + _
-                Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_SUBGROUP_NAME).Width + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_SUBGROUP_NAME).Left + _
+                Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_SUBGROUP_NAME).Width + _
                 margin
         .Top = mainTop + margin
         .Height = ((mainHeight - 3 * margin) * 0.84 - margin) / 2
@@ -651,198 +689,198 @@ Public Sub initializeShapes()
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(CURRENCY_LABEL_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(CURRENCY_LABEL_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Left + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Left + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Top + margin * 3 / 2
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Top + margin * 3 / 2
         .Height = margin * 3 / 2
-        .Width = (Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 3 * margin) / 2
+        .Width = (Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 3 * margin) / 2
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(VAT_LABEL_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(VAT_LABEL_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Left + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Left + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(CURRENCY_LABEL_SHAPE_NAME).Top + _
-               Application.Worksheets(SALES_SHEET_NAME).shapes(CURRENCY_LABEL_SHAPE_NAME).Height + _
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(CURRENCY_LABEL_SHAPE_NAME).Top + _
+               Application.Worksheets(SALES_SHEET_NAME).Shapes(CURRENCY_LABEL_SHAPE_NAME).Height + _
                margin
         .Height = margin * 3 / 2
-        .Width = (Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 3 * margin) / 2
+        .Width = (Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 3 * margin) / 2
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(CURRENCY_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(CURRENCY_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CURRENCY_LABEL_SHAPE_NAME).Left + _
-                Application.Worksheets(SALES_SHEET_NAME).shapes(CURRENCY_LABEL_SHAPE_NAME).Width + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CURRENCY_LABEL_SHAPE_NAME).Left + _
+                Application.Worksheets(SALES_SHEET_NAME).Shapes(CURRENCY_LABEL_SHAPE_NAME).Width + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(CURRENCY_LABEL_SHAPE_NAME).Top
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(CURRENCY_LABEL_SHAPE_NAME).Top
         .Height = margin * 3 / 2
-        .Width = (Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 3 * margin) / 2
+        .Width = (Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 3 * margin) / 2
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(VAT_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(VAT_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(VAT_LABEL_SHAPE_NAME).Left + _
-                Application.Worksheets(SALES_SHEET_NAME).shapes(VAT_LABEL_SHAPE_NAME).Width + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(VAT_LABEL_SHAPE_NAME).Left + _
+                Application.Worksheets(SALES_SHEET_NAME).Shapes(VAT_LABEL_SHAPE_NAME).Width + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(VAT_LABEL_SHAPE_NAME).Top
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(VAT_LABEL_SHAPE_NAME).Top
         .Height = margin * 3 / 2
-        .Width = (Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 3 * margin) / 2
+        .Width = (Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 3 * margin) / 2
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(DELIVERY_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(DELIVERY_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Left + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Left + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(VAT_LABEL_SHAPE_NAME).Top + _
-               Application.Worksheets(SALES_SHEET_NAME).shapes(VAT_LABEL_SHAPE_NAME).Height + _
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(VAT_LABEL_SHAPE_NAME).Top + _
+               Application.Worksheets(SALES_SHEET_NAME).Shapes(VAT_LABEL_SHAPE_NAME).Height + _
                margin
         .Height = margin * 7 / 2
-        .Width = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 2 * margin
+        .Width = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Width - 2 * margin
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Left
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Top + _
-               Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_PARAMS_SUBGROUP_NAME).Height + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Left
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Top + _
+               Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_PARAMS_SUBGROUP_NAME).Height + _
                margin
         .Height = ((mainHeight - 3 * margin) * 0.84 - margin) / 2
         .Width = mainWidth + mainLeft - .Left - margin
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Left + margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Top + margin * 3 / 2
-        .Height = (Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Height - 3 * margin) * 2 / 3
-        .Width = (Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Left + margin
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Top + margin * 3 / 2
+        .Height = (Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Height - 3 * margin) * 2 / 3
+        .Width = (Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(MARKUP_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(MARKUP_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Left + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Left + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Top + margin
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Top + margin
         .Height = margin
-        .Width = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Width - 2 * margin
+        .Width = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Width - 2 * margin
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(MARGIN_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(MARGIN_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Left + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Left + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(MARKUP_SHAPE_NAME).Top + _
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(MARKUP_SHAPE_NAME).Top + _
                margin * 3 / 2
         .Height = margin
-        .Width = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Width - 2 * margin
+        .Width = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Width - 2 * margin
         .Visible = msoTrue
     End With
     
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_SOURCE_SUBGROUP_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_SOURCE_SUBGROUP_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Left + _
-                Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Width + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Left + _
+                Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Width + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Top + margin * 3 / 2
-        .Height = (Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Height - 3 * margin) * 2 / 3
-        .Width = (Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Top + margin * 3 / 2
+        .Height = (Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Height - 3 * margin) * 2 / 3
+        .Width = (Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(GPL_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(GPL_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_SOURCE_SUBGROUP_NAME).Left + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_SOURCE_SUBGROUP_NAME).Left + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_SOURCE_SUBGROUP_NAME).Top + margin
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_SOURCE_SUBGROUP_NAME).Top + margin
         .Height = margin
-        .Width = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_SOURCE_SUBGROUP_NAME).Width - 2 * margin
+        .Width = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_SOURCE_SUBGROUP_NAME).Width - 2 * margin
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(NET_PRICE_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(NET_PRICE_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_SOURCE_SUBGROUP_NAME).Left + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_SOURCE_SUBGROUP_NAME).Left + _
                 margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(GPL_SHAPE_NAME).Top + _
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(GPL_SHAPE_NAME).Top + _
                margin * 3 / 2
         .Height = margin
-        .Width = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_SOURCE_SUBGROUP_NAME).Width - 2 * margin
+        .Width = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_SOURCE_SUBGROUP_NAME).Width - 2 * margin
         .Visible = msoTrue
     End With
     
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_LABEL_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_LABEL_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Left + margin / 2
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Top + _
-               Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Height + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Left + margin / 2
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Top + _
+               Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Height + _
                margin
-        .Height = (Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Height - 3 * margin) / 3
-        .Width = (Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2 + margin
+        .Height = (Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Height - 3 * margin) / 3
+        .Width = (Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2 + margin
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_BUTTON_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_BUTTON_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_LABEL_SHAPE_NAME).Left + _
-                Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_LABEL_SHAPE_NAME).Width + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_LABEL_SHAPE_NAME).Left + _
+                Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_LABEL_SHAPE_NAME).Width + _
                 margin / 2
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Top + _
-               Application.Worksheets(SALES_SHEET_NAME).shapes(CALC_TYPE_SUBGROUP_NAME).Height + _
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Top + _
+               Application.Worksheets(SALES_SHEET_NAME).Shapes(CALC_TYPE_SUBGROUP_NAME).Height + _
                margin
-        .Height = (Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Height - 3 * margin) / 3
-        .Width = (Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2
+        .Height = (Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Height - 3 * margin) / 3
+        .Width = (Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2
         .Visible = msoTrue
     End With
     
 
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_SUBGROUP_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_SUBGROUP_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_SUBGROUP_NAME).Left
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_SUBGROUP_NAME).Top + _
-               Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_SUBGROUP_NAME).Height + _
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_SUBGROUP_NAME).Left
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_SUBGROUP_NAME).Top + _
+               Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_SUBGROUP_NAME).Height + _
                margin
         .Height = (mainHeight - 3 * margin) * 0.16
         .Width = mainWidth - 2 * margin
         .Visible = msoTrue
     End With
     
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_LABEL_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_LABEL_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_SUBGROUP_NAME).Left + margin / 2
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_SUBGROUP_NAME).Top + margin * 3 / 2
-        .Height = Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_SUBGROUP_NAME).Height - 2 * margin
-        .Width = Application.Worksheets(SALES_SHEET_NAME).shapes(CHECKBOXES_SUBGROUP_NAME).Width - margin / 2
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_SUBGROUP_NAME).Left + margin / 2
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_SUBGROUP_NAME).Top + margin * 3 / 2
+        .Height = Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_SUBGROUP_NAME).Height - 2 * margin
+        .Width = Application.Worksheets(SALES_SHEET_NAME).Shapes(CHECKBOXES_SUBGROUP_NAME).Width - margin / 2
         .Visible = msoTrue
     End With
 
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_WORD_BUTTON_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_WORD_BUTTON_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Left + margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_LABEL_SHAPE_NAME).Top - margin / 2
-        .Height = Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_LABEL_SHAPE_NAME).Height + margin / 2
-        .Width = (Application.Worksheets(SALES_SHEET_NAME).shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Left + margin
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_LABEL_SHAPE_NAME).Top - margin / 2
+        .Height = Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_LABEL_SHAPE_NAME).Height + margin / 2
+        .Width = (Application.Worksheets(SALES_SHEET_NAME).Shapes(PROFIT_SUBGROUP_NAME).Width - 3 * margin) / 2
         .Visible = msoTrue
     End With
 
-    With Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_EXCEL_BUTTON_SHAPE_NAME)
+    With Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_EXCEL_BUTTON_SHAPE_NAME)
         .Placement = xlFreeFloating
-        .Left = Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_WORD_BUTTON_SHAPE_NAME).Left + _
-                Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_WORD_BUTTON_SHAPE_NAME).Width + margin
-        .Top = Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_LABEL_SHAPE_NAME).Top - margin / 2
-        .Height = Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_LABEL_SHAPE_NAME).Height + margin / 2
-        .Width = Application.Worksheets(SALES_SHEET_NAME).shapes(EXPORT_WORD_BUTTON_SHAPE_NAME).Width
+        .Left = Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_WORD_BUTTON_SHAPE_NAME).Left + _
+                Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_WORD_BUTTON_SHAPE_NAME).Width + margin
+        .Top = Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_LABEL_SHAPE_NAME).Top - margin / 2
+        .Height = Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_LABEL_SHAPE_NAME).Height + margin / 2
+        .Width = Application.Worksheets(SALES_SHEET_NAME).Shapes(EXPORT_WORD_BUTTON_SHAPE_NAME).Width
         .Visible = msoTrue
     End With
 
@@ -850,6 +888,6 @@ CleanExit:
     Exit Sub
     
 ErrorHandler:
-    MsgBox "Error " & err.number & ": " & err.Description
+    MsgBox "Error " & Err.number & ": " & Err.Description
     Resume CleanExit
 End Sub
