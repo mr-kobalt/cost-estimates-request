@@ -776,8 +776,8 @@ Public Sub resetFormulasInPurchaseTable(Optional column As Long = 0)
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT_PURCHASE) & "]]"
                 
                 .columns(column).FormulaR1C1 = "=ROUND(" & cell1 & _
-                                            "*IF(" & cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",1),1/1.18*0.18,IF(" & _
-                                            cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",2),0.18,0))," & _
+                                            "*IF(" & cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",1),1/(1+" & VAT_PCT & ")*" & VAT_PCT & ",IF(" & _
+                                            cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",2)," & VAT_PCT & ",0))," & _
                                             PRICE_ROUNDING_UP_TO_QTY & ")"
                 
             Case 0
@@ -849,8 +849,8 @@ Public Sub resetFormulasInPurchaseTable(Optional column As Long = 0)
                 cell1 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.TOTAL_PURCHASE_RECALCULATED) & "]]"
                 cell2 = "[@[" & getTableColumnName(PURCHASE_TABLE_NAME, PurchaseColumns.VAT_PURCHASE) & "]]"
                 .columns(PurchaseColumns.VAT_PURCHASE_AMOUNT).FormulaR1C1 = "=ROUND(" & cell1 & _
-                                            "*IF(" & cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",1),1/1.18*0.18,IF(" & _
-                                            cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",2),0.18,0))," & _
+                                            "*IF(" & cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",1),1/(1+" & VAT_PCT & ")*" & VAT_PCT & ",IF(" & _
+                                            cell2 & "=INDEX(" & VAT_ARRAY_NAME & ",2)," & VAT_PCT & ",0))," & _
                                             PRICE_ROUNDING_UP_TO_QTY & ")"
         End Select
     End With

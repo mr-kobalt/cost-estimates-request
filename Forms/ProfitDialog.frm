@@ -1,9 +1,9 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} ProfitDialog 
    Caption         =   "Размер "
-   ClientHeight    =   1190
-   ClientLeft      =   105
-   ClientTop       =   450
+   ClientHeight    =   1188
+   ClientLeft      =   108
+   ClientTop       =   456
    ClientWidth     =   3120
    OleObjectBlob   =   "ProfitDialog.frx":0000
    StartUpPosition =   1  'CenterOwner

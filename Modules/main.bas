@@ -276,6 +276,10 @@ Private Function makeSalesTable(desiredColumns As Collection)
                     newColumn.Value2 = .columns(columnValue).Value2
                     formatRangeAsType newColumn
                     
+                Case columnValue = SalesColumns.MANUFACTURER
+                    newColumn.Formula = "='" & PURCHASE_SHEET_NAME & "'!" & .columns(PurchaseColumns.MANUFACTURER).Cells(1).Address(False, True, xlA1)
+                    formatRangeAsType newColumn, "wo-zeros"
+                    
                 Case columnValue = SalesColumns.PN
                     newColumn.Formula = "='" & PURCHASE_SHEET_NAME & "'!" & .columns(PurchaseColumns.PN).Cells(1).Address(False, True, xlA1)
                     formatRangeAsType newColumn, "wo-zeros"
@@ -321,8 +325,8 @@ Private Function makeSalesTable(desiredColumns As Collection)
                                             Cells(1).Address(False, True, xlR1C1, , newColumn.Cells(1))
                     newColumn.FormulaR1C1 = "=ROUND(RC" & _
                                             (findColNumber(desiredColumns, SalesColumns.total) + COLUMN_OFFSET) & _
-                                            "*IF(" & tempAddress1 & "=INDEX(" & VAT_ARRAY_NAME & ",1),0.18/1.18,IF(" & _
-                                            tempAddress1 & "=INDEX(" & VAT_ARRAY_NAME & ",2),0.18,0))," & _
+                                            "*IF(" & tempAddress1 & "=INDEX(" & VAT_ARRAY_NAME & ",1)," & VAT_PCT & "/(1+" & VAT_PCT & "),IF(" & _
+                                            tempAddress1 & "=INDEX(" & VAT_ARRAY_NAME & ",2)," & VAT_PCT & ",0))," & _
                                             PRICE_ROUNDING_UP_TO_QTY & ")"
 
                     formatRangeAsType newColumn, "price"
